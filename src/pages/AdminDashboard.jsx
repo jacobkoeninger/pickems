@@ -4,6 +4,8 @@ import { getOpenPickems, closePickem, createPickem, getPickemChoices, getCategor
 
 const AdminDashboard = () => {
   const [selectedContest, setSelectedContest] = useState(null);
+  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [confirmClose, setConfirmClose] = useState(null);
   const { data: pickems, isLoading: pickemsLoading, error: pickemsError } = useQuery(getOpenPickems);
   const { data: pickemChoices } = useQuery(getPickemChoices);
   const { data: categories } = useQuery(getCategories);
@@ -15,7 +17,14 @@ const AdminDashboard = () => {
   if (pickemsError) return <div className="text-red-500 font-mono">[ERROR]: {pickemsError}</div>;
 
   const handleClosePickem = (pickemId, correctChoiceId) => {
-    closePickemFn({ pickemId, correctChoiceId });
+    setConfirmClose({ pickemId, correctChoiceId });
+  };
+
+  const confirmClosePickem = () => {
+    if (confirmClose) {
+      closePickemFn({ pickemId: confirmClose.pickemId, correctChoiceId: confirmClose.correctChoiceId });
+      setConfirmClose(null);
+    }
   };
 
   const filteredPickems = pickems?.filter(pickem => pickem.contestId === selectedContest?.id);
@@ -23,6 +32,29 @@ const AdminDashboard = () => {
   return (
     <div className="bg-black text-green-500 min-h-screen p-6">
       <h1 className="text-2xl font-mono mb-4 glitch-text">[ADMIN_CONSOLE]</h1>
+      
+      {confirmClose && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-black border-2 border-green-500 p-6 rounded-lg shadow-[0_0_15px_rgba(34,197,94,0.3)] max-w-md w-full">
+            <h3 className="text-xl font-mono mb-4 text-green-400">&gt; CONFIRM_CLOSE_PICKEM</h3>
+            <p className="font-mono mb-6">Are you sure you want to close this pickem? This action cannot be undone.</p>
+            <div className="flex justify-end space-x-4">
+              <button
+                onClick={() => setConfirmClose(null)}
+                className="px-4 py-2 font-mono text-green-500 border border-green-500 rounded hover:bg-red-500 hover:text-black hover:border-red-500 transition-all duration-200"
+              >
+                CANCEL
+              </button>
+              <button
+                onClick={confirmClosePickem}
+                className="px-4 py-2 font-mono text-green-500 border border-green-500 rounded hover:bg-green-500 hover:text-black transition-all duration-200"
+              >
+                CONFIRM
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       
       {selectedContest ? (
         <>
@@ -32,10 +64,21 @@ const AdminDashboard = () => {
           >
             &lt; RETURN_TO_CONTESTS
           </button>
-          <CreatePickemForm 
-            existingCategories={categories?.map(c => c.name) || []} 
-            contestId={selectedContest.id}
-          />
+
+          <button
+            onClick={() => setShowCreateForm(!showCreateForm)}
+            className="mb-4 ml-4 px-4 py-2 font-mono text-green-500 hover:text-black border border-green-500 hover:bg-green-500 rounded transition-all duration-200 ease-in-out hover:shadow-[0_0_10px_rgba(34,197,94,0.5)]"
+          >
+            {showCreateForm ? 'CANCEL_CREATE' : 'CREATE_NEW_PICKEM'}
+          </button>
+
+          {showCreateForm && (
+            <CreatePickemForm 
+              existingCategories={categories?.map(c => c.name) || []} 
+              contestId={selectedContest.id}
+            />
+          )}
+          
           <PickemList 
             pickems={filteredPickems} 
             pickemChoices={pickemChoices} 
@@ -207,12 +250,14 @@ const PickemList = ({ pickems, pickemChoices, onClosePickem }) => {
                       <p className="text-sm text-green-400 font-mono">OWNER: {choiceDetails.owner?.username} [ID: {choiceDetails.ownerId}]</p>
                     )}
                   </div>
-                  <button
-                    onClick={() => onClosePickem(pickem.id, choice.id)}
-                    className="px-4 py-2 font-mono text-green-500 hover:text-black border border-green-500 hover:bg-green-500 rounded transition-all duration-200 ease-in-out hover:shadow-[0_0_10px_rgba(34,197,94,0.5)]"
-                  >
-                    SET_WINNER
-                  </button>
+                  <div className="flex items-center">
+                    <button
+                      onClick={() => onClosePickem(pickem.id, choice.id)}
+                      className="px-3 py-1 font-mono text-green-500 hover:text-black border border-green-500 hover:bg-green-500 rounded transition-all duration-200 ease-in-out hover:shadow-[0_0_10px_rgba(34,197,94,0.5)] flex items-center"
+                    >
+                      <span className="text-xl mr-1">✓</span>
+                    </button>
+                  </div>
                 </div>
               );
             })}

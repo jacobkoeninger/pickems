@@ -25,6 +25,13 @@ export const Layout = () => {
                   onClick={() => setDropdownOpen(!dropdownOpen)}
                   className="px-3 py-1 font-mono text-green-500 hover:text-black border border-green-500 hover:bg-green-500 rounded transition-all duration-200 ease-in-out flex items-center hover:shadow-[0_0_10px_rgba(34,197,94,0.5)]"
                 >
+                  {user.avatarUrl && (
+                    <img 
+                      src={user.avatarUrl} 
+                      alt="Avatar"
+                      className="w-6 h-6 rounded-full mr-2"
+                    />
+                  )}
                   <span className="mr-1">&gt;</span>{user.identities.username?.id}
                   <svg className={`w-4 h-4 ml-2 transition-transform ${dropdownOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />

@@ -1,27 +1,22 @@
 import { sanitizeAndSerializeProviderData } from 'wasp/server/auth'
 
 export const devSeedAdmin = async (prisma) => {
-  const admin = await createUser(prisma, {
-    username: 'admin',
-    password: 'admin123', // Change this in production!
-    isAdmin: true
-  })
 
   const users = []
   for (let i = 1; i <= 12; i++) {
     const user = await createUser(prisma, {
       username: `user${i}`,
-      password: `password${i}`,
+      displayName: `Test User ${i}`,
       isAdmin: false
     })
     users.push(user)
   }
-
   // Create the 2025 Contest
   const contest = await prisma.contest.create({
     data: {
       name: '2025',
-      description: 'Predictions for 2025'
+      description: 'Predictions for 2025',
+      deadline: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
     }
   })
 
@@ -75,6 +70,8 @@ export const devSeedAdmin = async (prisma) => {
 async function createUser(prisma, data) {
   const newUser = await prisma.user.create({
     data: {
+      username: data.username,
+      displayName: data.displayName,
       isAdmin: data.isAdmin || false,
       points: 0
     },

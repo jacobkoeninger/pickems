@@ -11,6 +11,11 @@ generator client {
 
 model User {
     id               Int               @id @default(autoincrement())
+
+    username    String @unique
+    displayName String
+    avatarUrl     String?
+
     points           Int              @default(0)
     isAdmin          Boolean          @default(false)
     ownedChoices     PickemChoice[]
@@ -21,6 +26,7 @@ model Contest {
     id              Int              @id @default(autoincrement())
     name            String
     description     String?
+    deadline        DateTime
     pickems         Pickem[]
 }
 
