@@ -14,6 +14,14 @@ export const createContest = async ({ name, description }, context) => {
   return contest
 }
 
+export const updateUser = async ({ username }, context) => {
+  if (!context.user) { throw new HttpError(401) }
+  await context.entities.User.update({
+    where: { id: context.user.id },
+    data: { username }
+  })
+}
+
 export const createPickem = async ({ choices, categoryId, contestId }, context) => {
   if (!context.user) { throw new HttpError(401) }
 
