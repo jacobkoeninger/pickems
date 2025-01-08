@@ -15,65 +15,65 @@ const Settings = () => {
     console.log('Update user:', { username });
   };
 
-  if (!user || !contests || !userChoices) return 'Loading...';
+  if (!user || !contests || !userChoices) return 'LOADING...';
 
   const totalContests = contests.length;
   const totalPicks = userChoices.length;
 
   return (
-    <div className="bg-stone-100">
-      <h1 className="text-2xl font-serif mb-4">Settings</h1>
+    <div className="bg-black text-green-500 min-h-screen p-6">
+      <h1 className="text-2xl font-mono mb-4 glitch-text">[CONFIG_PANEL]</h1>
 
-      <div className="p-4 bg-white border border-stone-300 rounded">
-        <h2 className="text-xl font-serif mb-4">Account Settings</h2>
+      <div className="border border-green-500 rounded bg-black p-6 shadow-[0_0_15px_rgba(34,197,94,0.3)]">
+        <h2 className="text-xl font-mono mb-4 text-green-400">&gt; USER_SETTINGS</h2>
         
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
-            <label className="block text-stone-700 text-sm font-serif mb-2">
-              Username
+            <label className="block text-green-400 text-sm font-mono mb-2">
+              &gt; HANDLE
             </label>
             <input
               type="text"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              className="border border-stone-300 rounded w-full py-2 px-3 text-stone-700 focus:outline-none focus:border-stone-500"
-              placeholder="Username"
+              className="w-full py-2 px-3 bg-black border border-green-500 rounded text-green-500 font-mono focus:outline-none focus:border-green-400 focus:shadow-[0_0_10px_rgba(34,197,94,0.5)]"
+              placeholder="ENTER_USERNAME"
             />
           </div>
 
           <button
             type="submit"
-            className="bg-stone-800 hover:bg-stone-700 text-stone-100 font-serif py-2 px-4 rounded transition-colors"
+            className="bg-green-500 hover:bg-green-400 text-black font-mono py-2 px-4 rounded transition-colors"
           >
-            Update Settings
+            EXECUTE_UPDATE
           </button>
         </form>
 
-        <div className="mt-8 pt-4 border-t border-stone-300">
-          <h3 className="text-lg font-serif mb-2">Account Statistics</h3>
+        <div className="mt-8 pt-4 border-t border-green-500">
+          <h3 className="text-lg font-mono mb-2 text-green-400">&gt; SYSTEM_METRICS</h3>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <p className="text-stone-600 font-serif">Total Points: {user.points}</p>
-              <p className="text-stone-600 font-serif">Total Contests: {totalContests}</p>
+              <p className="text-green-500 font-mono">POINTS: {user.points}</p>
+              <p className="text-green-500 font-mono">CONTESTS: {totalContests}</p>
             </div>
             <div>
-              <p className="text-stone-600 font-serif">Total Picks Made: {totalPicks}</p>
-              <p className="text-stone-600 font-serif">Average Points Per Contest: {totalContests > 0 ? (user.points / totalContests).toFixed(2) : 0}</p>
+              <p className="text-green-500 font-mono">PICKS: {totalPicks}</p>
+              <p className="text-green-500 font-mono">AVG_PTS: {totalContests > 0 ? (user.points / totalContests).toFixed(2) : 0}</p>
             </div>
           </div>
         </div>
 
-        <div className="mt-8 pt-4 border-t border-stone-300">
-          <h3 className="text-lg font-serif mb-2">Your Contests</h3>
+        <div className="mt-8 pt-4 border-t border-green-500">
+          <h3 className="text-lg font-mono mb-2 text-green-400">&gt; CONTEST_LOG</h3>
           <div className="space-y-4">
             {contests.map(contest => (
-              <div key={contest.id} className="p-4 border border-stone-200 rounded">
-                <h4 className="font-serif text-lg mb-2">{contest.name}</h4>
+              <div key={contest.id} className="p-4 border border-green-500 rounded hover:shadow-[0_0_10px_rgba(34,197,94,0.5)] transition-shadow">
+                <h4 className="font-mono text-lg mb-2">[{contest.name}]</h4>
                 {contest.description && (
-                  <p className="text-stone-600 mb-2">{contest.description}</p>
+                  <p className="text-green-400 mb-2 font-mono">&gt; {contest.description}</p>
                 )}
-                <div className="text-sm text-stone-500">
-                  <p>Total Pickems: {contest.pickems.length}</p>
+                <div className="text-sm text-green-500 font-mono">
+                  <p>TOTAL_PICKEMS: {contest.pickems.length}</p>
                 </div>
               </div>
             ))}

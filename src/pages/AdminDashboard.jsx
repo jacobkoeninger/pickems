@@ -10,9 +10,9 @@ const AdminDashboard = () => {
   const { data: contests, isLoading: contestsLoading, error: contestsError } = useQuery(getContests);
   const closePickemFn = useAction(closePickem);
 
-  if (contestsLoading || pickemsLoading) return 'Loading...';
-  if (contestsError) return 'Error loading contests: ' + contestsError;
-  if (pickemsError) return 'Error loading pickems: ' + pickemsError;
+  if (contestsLoading || pickemsLoading) return <div className="text-green-500 font-mono">[LOADING...]</div>;
+  if (contestsError) return <div className="text-red-500 font-mono">[ERROR]: {contestsError}</div>;
+  if (pickemsError) return <div className="text-red-500 font-mono">[ERROR]: {pickemsError}</div>;
 
   const handleClosePickem = (pickemId, correctChoiceId) => {
     closePickemFn({ pickemId, correctChoiceId });
@@ -21,16 +21,16 @@ const AdminDashboard = () => {
   const filteredPickems = pickems?.filter(pickem => pickem.contestId === selectedContest?.id);
 
   return (
-    <div className="bg-stone-100">
-      <h1 className="text-2xl font-serif mb-4">Admin Dashboard</h1>
+    <div className="bg-black text-green-500 min-h-screen p-6">
+      <h1 className="text-2xl font-mono mb-4 glitch-text">[ADMIN_CONSOLE]</h1>
       
       {selectedContest ? (
         <>
           <button
             onClick={() => setSelectedContest(null)}
-            className="mb-4 bg-stone-800 hover:bg-stone-700 text-stone-100 font-serif py-2 px-4 rounded transition-colors"
+            className="mb-4 px-4 py-2 font-mono text-green-500 hover:text-black border border-green-500 hover:bg-green-500 rounded transition-all duration-200 ease-in-out hover:shadow-[0_0_10px_rgba(34,197,94,0.5)]"
           >
-            ← Back to Contests
+            &lt; RETURN_TO_CONTESTS
           </button>
           <CreatePickemForm 
             existingCategories={categories?.map(c => c.name) || []} 
@@ -43,22 +43,22 @@ const AdminDashboard = () => {
           />
         </>
       ) : (
-        <div className="mb-8 p-4 bg-white border border-stone-300 rounded">
-          <h2 className="text-xl font-serif mb-4">Available Contests</h2>
+        <div className="mb-8 p-6 bg-black border border-green-500 rounded shadow-[0_0_15px_rgba(34,197,94,0.3)]">
+          <h2 className="text-xl font-mono mb-4 text-green-400">&gt; AVAILABLE_CONTESTS</h2>
           <div className="grid grid-cols-1 gap-4">
             {contests?.map((contest) => (
               <div 
                 key={contest.id} 
-                className={`p-4 border rounded cursor-pointer transition-colors ${
+                className={`p-4 border rounded cursor-pointer transition-all duration-200 ${
                   selectedContest?.id === contest.id 
-                    ? 'bg-stone-200 border-stone-400' 
-                    : 'bg-white border-stone-300 hover:bg-stone-50'
+                    ? 'bg-green-500 text-black border-green-500' 
+                    : 'bg-black border-green-500 hover:shadow-[0_0_10px_rgba(34,197,94,0.5)]'
                 }`}
                 onClick={() => setSelectedContest(contest)}
               >
-                <h3 className="text-lg font-serif">{contest.name}</h3>
+                <h3 className="text-lg font-mono">&gt; {contest.name}</h3>
                 {contest.description && (
-                  <p className="text-stone-600 font-serif mt-2">{contest.description}</p>
+                  <p className="font-mono mt-2 opacity-80">{contest.description}</p>
                 )}
               </div>
             ))}
@@ -89,8 +89,8 @@ const CreatePickemForm = ({ existingCategories, contestId }) => {
   };
 
   return (
-    <div className="mb-8 p-4 bg-white border border-stone-300 rounded">
-      <h2 className="text-xl font-serif mb-4">Create New Pickem</h2>
+    <div className="mb-8 p-6 bg-black border border-green-500 rounded shadow-[0_0_15px_rgba(34,197,94,0.3)]">
+      <h2 className="text-xl font-mono mb-4 text-green-400">&gt; CREATE_NEW_PICKEM</h2>
       <form onSubmit={handleSubmit}>
         <div className="mb-4">
           <CategorySelection
@@ -101,16 +101,16 @@ const CreatePickemForm = ({ existingCategories, contestId }) => {
             existingCategories={existingCategories}
           />
 
-          <label className="block text-stone-700 text-sm font-serif mb-2">
-            Choices
+          <label className="block text-green-400 text-sm font-mono mb-2">
+            &gt; CHOICES
           </label>
           {[1, 2].map((num) => (
             <input
               key={num}
               type="text"
               name={`choice${num}`}
-              className="border border-stone-300 rounded w-full py-2 px-3 text-stone-700 mb-2 focus:outline-none focus:border-stone-500"
-              placeholder={`Choice ${num}`}
+              className="w-full py-2 px-3 mb-2 bg-black border border-green-500 rounded text-green-500 font-mono focus:outline-none focus:border-green-400 focus:shadow-[0_0_10px_rgba(34,197,94,0.5)]"
+              placeholder={`CHOICE_${num}`}
               required
             />
           ))}
@@ -118,9 +118,9 @@ const CreatePickemForm = ({ existingCategories, contestId }) => {
 
         <button
           type="submit"
-          className="bg-stone-800 hover:bg-stone-700 text-stone-100 font-serif py-2 px-4 rounded transition-colors"
+          className="px-4 py-2 font-mono text-green-500 hover:text-black border border-green-500 hover:bg-green-500 rounded transition-all duration-200 ease-in-out hover:shadow-[0_0_10px_rgba(34,197,94,0.5)]"
         >
-          Create Pickem
+          EXECUTE_CREATE
         </button>
       </form>
     </div>
@@ -130,28 +130,28 @@ const CreatePickemForm = ({ existingCategories, contestId }) => {
 const CategorySelection = ({ category, setCategory, isNewCategory, setIsNewCategory, existingCategories }) => {
   return (
     <>
-      <label className="block text-stone-700 text-sm font-serif mb-2">
-        Category
+      <label className="block text-green-400 text-sm font-mono mb-2">
+        &gt; CATEGORY
       </label>
       
-      <div className="mb-4">
+      <div className="mb-4 font-mono">
         <label className="inline-flex items-center mr-4">
           <input
             type="radio"
             checked={isNewCategory}
             onChange={() => setIsNewCategory(true)}
-            className="form-radio text-stone-800"
+            className="form-radio text-green-500"
           />
-          <span className="ml-2 font-serif">New Category</span>
+          <span className="ml-2 text-green-500">NEW_CATEGORY</span>
         </label>
         <label className="inline-flex items-center">
           <input
             type="radio"
             checked={!isNewCategory}
             onChange={() => setIsNewCategory(false)}
-            className="form-radio text-stone-800"
+            className="form-radio text-green-500"
           />
-          <span className="ml-2 font-serif">Existing Category</span>
+          <span className="ml-2 text-green-500">EXISTING_CATEGORY</span>
         </label>
       </div>
 
@@ -161,8 +161,8 @@ const CategorySelection = ({ category, setCategory, isNewCategory, setIsNewCateg
           name="newCategory"
           value={category}
           onChange={(e) => setCategory(e.target.value)}
-          className="border border-stone-300 rounded w-full py-2 px-3 text-stone-700 mb-4 focus:outline-none focus:border-stone-500"
-          placeholder="Enter new category"
+          className="w-full py-2 px-3 mb-4 bg-black border border-green-500 rounded text-green-500 font-mono focus:outline-none focus:border-green-400 focus:shadow-[0_0_10px_rgba(34,197,94,0.5)]"
+          placeholder="ENTER_NEW_CATEGORY"
           required
         />
       ) : (
@@ -170,10 +170,10 @@ const CategorySelection = ({ category, setCategory, isNewCategory, setIsNewCateg
           name="existingCategory"
           value={category}
           onChange={(e) => setCategory(e.target.value)}
-          className="border border-stone-300 rounded w-full py-2 px-3 text-stone-700 mb-4 focus:outline-none focus:border-stone-500"
+          className="w-full py-2 px-3 mb-4 bg-black border border-green-500 rounded text-green-500 font-mono focus:outline-none focus:border-green-400 focus:shadow-[0_0_10px_rgba(34,197,94,0.5)]"
           required
         >
-          <option value="">Select a category</option>
+          <option value="">SELECT_CATEGORY</option>
           {existingCategories.map((cat) => (
             <option key={cat} value={cat}>
               {cat}
@@ -189,29 +189,29 @@ const PickemList = ({ pickems, pickemChoices, onClosePickem }) => {
   return (
     <div className="grid grid-cols-1 gap-4">
       {pickems?.map((pickem) => (
-        <div key={pickem.id} className="p-4 bg-white border border-stone-300 rounded">
+        <div key={pickem.id} className="p-6 bg-black border border-green-500 rounded shadow-[0_0_15px_rgba(34,197,94,0.3)]">
           <div className="mb-4">
-            <h3 className="text-lg font-serif">Pickem #{pickem.id}</h3>
+            <h3 className="text-lg font-mono text-green-400">&gt; PICKEM #{pickem.id}</h3>
             {pickem.category && (
-              <p className="text-stone-600 font-serif">Category: {pickem.category}</p>
+              <p className="text-green-500 font-mono opacity-80">CATEGORY: {pickem.category}</p>
             )}
           </div>
           <div className="space-y-4">
             {pickem.choices.map((choice) => {
               const choiceDetails = pickemChoices?.find(pc => pc.id === choice.id);
               return (
-                <div key={choice.id} className="flex items-center justify-between border-b border-stone-300 pb-2">
+                <div key={choice.id} className="flex items-center justify-between border-b border-green-500 pb-2">
                   <div>
-                    <p className="font-serif">{choice.text}</p>
+                    <p className="font-mono text-green-500">{choice.text}</p>
                     {choiceDetails && (
-                      <p className="text-sm text-stone-600 font-serif">Owner: {choiceDetails.owner?.username} (ID: {choiceDetails.ownerId})</p>
+                      <p className="text-sm text-green-400 font-mono">OWNER: {choiceDetails.owner?.username} [ID: {choiceDetails.ownerId}]</p>
                     )}
                   </div>
                   <button
                     onClick={() => onClosePickem(pickem.id, choice.id)}
-                    className="bg-stone-800 hover:bg-stone-700 text-stone-100 font-serif py-2 px-4 rounded transition-colors"
+                    className="px-4 py-2 font-mono text-green-500 hover:text-black border border-green-500 hover:bg-green-500 rounded transition-all duration-200 ease-in-out hover:shadow-[0_0_10px_rgba(34,197,94,0.5)]"
                   >
-                    Select as Winner
+                    SET_WINNER
                   </button>
                 </div>
               );

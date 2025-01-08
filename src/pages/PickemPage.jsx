@@ -9,13 +9,13 @@ const PickemPage = () => {
   const { data: userChoices } = useQuery(getUserPickemChoices);
   const createUserPickemChoiceFn = useAction(createUserPickemChoice);
   const [currentPickemIndex, setCurrentPickemIndex] = useState(0);
-  const [viewMode, setViewMode] = useState('single'); // 'single' or 'paged'
+  const [viewMode, setViewMode] = useState('single');
   const [currentPage, setCurrentPage] = useState(0);
   const itemsPerPage = 10;
 
-  if (isLoading) return 'Loading...';
-  if (error) return 'Error: ' + error;
-  if (!pickems?.length) return 'No predictions available.';
+  if (isLoading) return <div className="text-green-500 font-mono">[LOADING...]</div>;
+  if (error) return <div className="text-red-500 font-mono">[ERROR]: {error}</div>;
+  if (!pickems?.length) return <div className="text-green-500 font-mono">[NO_PREDICTIONS_FOUND]</div>;
 
   const currentPickem = pickems[currentPickemIndex];
   const totalPages = Math.ceil(pickems.length / itemsPerPage);
@@ -51,15 +51,15 @@ const PickemPage = () => {
 
   const renderPickemChoice = (pickem) => {
     return (
-      <div key={pickem.id} className="bg-white rounded border border-stone-300 p-6 mb-4">
+      <div key={pickem.id} className="bg-black border border-green-500 rounded p-6 mb-4 shadow-[0_0_15px_rgba(34,197,94,0.2)]">
         {pickem.category && (
-          <div className="text-sm text-stone-600 font-serif mb-2">
-            Category: {pickem.category}
+          <div className="text-sm text-green-400 font-mono mb-2">
+            [CATEGORY]: {pickem.category}
           </div>
         )}
         
-        <h2 className="text-xl font-serif mb-6">
-          Make your prediction:
+        <h2 className="text-xl font-mono text-green-500 mb-6 glitch-text">
+          &gt; SELECT_PREDICTION:
         </h2>
 
         <div className="space-y-4">
@@ -70,24 +70,24 @@ const PickemPage = () => {
                 key={choice.id}
                 onClick={() => !choiceMade && handleChoice(choice.id)}
                 disabled={choiceMade}
-                className={`w-full py-4 px-6 border rounded transition-colors duration-200
-                           flex items-center justify-between group font-serif
+                className={`w-full py-4 px-6 border rounded transition-all duration-200
+                           flex items-center justify-between group font-mono
                            ${choiceMade 
-                             ? 'bg-stone-50 border-stone-500 text-stone-700 cursor-default'
-                             : 'bg-white border-stone-300 hover:bg-stone-50 text-stone-800'
+                             ? 'bg-green-900/20 border-green-500 text-green-500'
+                             : 'bg-black border-green-500 hover:bg-green-500/10 text-green-500 hover:shadow-[0_0_10px_rgba(34,197,94,0.5)]'
                            }`}
               >
                 <span className="flex items-center">
-                  {choiceMade && (
-                    <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-                    </svg>
+                  {choiceMade ? (
+                    <span className="mr-2">[✓]</span>
+                  ) : (
+                    <span className="mr-2">&gt;</span>
                   )}
                   {choice.text}
                 </span>
                 {!choiceMade && (
                   <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                    →
+                    _EXECUTE
                   </span>
                 )}
               </button>
@@ -104,23 +104,23 @@ const PickemPage = () => {
         <div className="flex space-x-4">
           <button
             onClick={() => setViewMode('single')}
-            className={`px-4 py-2 rounded font-serif ${
+            className={`px-4 py-2 rounded font-mono border ${
               viewMode === 'single' 
-                ? 'bg-stone-800 text-white'
-                : 'bg-white border border-stone-300 hover:bg-stone-50'
+                ? 'bg-green-500 text-black border-green-500'
+                : 'bg-black text-green-500 border-green-500 hover:bg-green-500/10'
             }`}
           >
-            Single View
+            [SINGLE_MODE]
           </button>
           <button
             onClick={() => setViewMode('paged')}
-            className={`px-4 py-2 rounded font-serif ${
+            className={`px-4 py-2 rounded font-mono border ${
               viewMode === 'paged'
-                ? 'bg-stone-800 text-white'
-                : 'bg-white border border-stone-300 hover:bg-stone-50'
+                ? 'bg-green-500 text-black border-green-500'
+                : 'bg-black text-green-500 border-green-500 hover:bg-green-500/10'
             }`}
           >
-            Page View
+            [PAGED_MODE]
           </button>
         </div>
       </div>
@@ -128,9 +128,9 @@ const PickemPage = () => {
       {viewMode === 'single' ? (
         <>
           <div className="mb-4">
-            <div className="w-full bg-stone-200 rounded-full h-2.5">
+            <div className="w-full bg-green-900/20 rounded-full h-2.5">
               <div 
-                className="bg-stone-800 h-2.5 rounded-full transition-all duration-300" 
+                className="bg-green-500 h-2.5 rounded-full transition-all duration-300 shadow-[0_0_10px_rgba(34,197,94,0.5)]" 
                 style={{ width: `${progress}%` }}
               ></div>
             </div>
@@ -138,26 +138,26 @@ const PickemPage = () => {
               <button
                 onClick={goToPrevious}
                 disabled={currentPickemIndex === 0}
-                className={`text-sm font-serif ${currentPickemIndex === 0 ? 'text-stone-400 cursor-not-allowed' : 'text-stone-800 hover:text-stone-600'}`}
+                className={`text-sm font-mono ${currentPickemIndex === 0 ? 'text-green-800 cursor-not-allowed' : 'text-green-500 hover:text-green-400'}`}
               >
-                ← Previous
+                &lt;&lt; PREV
               </button>
-              <p className="text-sm text-stone-600 font-serif">
-                Question {currentPickemIndex + 1} of {pickems.length}
+              <p className="text-sm text-green-500 font-mono">
+                [{currentPickemIndex + 1}/{pickems.length}]
               </p>
               <button
                 onClick={goToNext}
                 disabled={currentPickemIndex === pickems.length - 1}
-                className={`text-sm font-serif ${currentPickemIndex === pickems.length - 1 ? 'text-stone-400 cursor-not-allowed' : 'text-stone-800 hover:text-stone-600'}`}
+                className={`text-sm font-mono ${currentPickemIndex === pickems.length - 1 ? 'text-green-800 cursor-not-allowed' : 'text-green-500 hover:text-green-400'}`}
               >
-                Next →
+                NEXT &gt;&gt;
               </button>
             </div>
           </div>
           {renderPickemChoice(currentPickem)}
           {currentPickemIndex === pickems.length - 1 && (
-            <p className="mt-6 text-center text-stone-600 font-serif">
-              This is the last prediction!
+            <p className="mt-6 text-center text-green-500 font-mono">
+              [END_OF_PREDICTIONS_REACHED]
             </p>
           )}
         </>
@@ -168,19 +168,19 @@ const PickemPage = () => {
             <button
               onClick={() => setCurrentPage(p => Math.max(0, p - 1))}
               disabled={currentPage === 0}
-              className={`text-sm font-serif ${currentPage === 0 ? 'text-stone-400 cursor-not-allowed' : 'text-stone-800 hover:text-stone-600'}`}
+              className={`text-sm font-mono ${currentPage === 0 ? 'text-green-800 cursor-not-allowed' : 'text-green-500 hover:text-green-400'}`}
             >
-              ← Previous Page
+              &lt;&lt; PREV_PAGE
             </button>
-            <p className="text-sm text-stone-600 font-serif">
-              Page {currentPage + 1} of {totalPages}
+            <p className="text-sm text-green-500 font-mono">
+              PAGE_{currentPage + 1}/{totalPages}
             </p>
             <button
               onClick={() => setCurrentPage(p => Math.min(totalPages - 1, p + 1))}
               disabled={currentPage === totalPages - 1}
-              className={`text-sm font-serif ${currentPage === totalPages - 1 ? 'text-stone-400 cursor-not-allowed' : 'text-stone-800 hover:text-stone-600'}`}
+              className={`text-sm font-mono ${currentPage === totalPages - 1 ? 'text-green-800 cursor-not-allowed' : 'text-green-500 hover:text-green-400'}`}
             >
-              Next Page →
+              NEXT_PAGE &gt;&gt;
             </button>
           </div>
         </>
