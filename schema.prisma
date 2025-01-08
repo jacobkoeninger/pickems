@@ -1,0 +1,67 @@
+datasource db {
+  provider = "sqlite"
+  // Wasp requires that the url is set to the DATABASE_URL environment variable.
+  url      = env("DATABASE_URL")
+}
+
+// Wasp requires the `prisma-client-js` generator to be present.
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+    id               Int               @id @default(autoincrement())
+    points           Int              @default(0)
+    isAdmin          Boolean          @default(false)
+    ownedChoices     PickemChoice[]
+    userPickemChoices UserPickemChoice[]
+}
+
+model Contest {
+    id              Int              @id @default(autoincrement())
+    name            String
+    description     String?
+    pickems         Pickem[]
+}
+
+model PickemCategory {
+    id              Int              @id @default(autoincrement())
+    name            String           @unique
+    description     String?
+    pickems         Pickem[]
+}
+
+model Pickem {
+    id                 Int           @id @default(autoincrement())
+    choices           PickemChoice[]
+    correctChoice     PickemChoice?  @relation(name: "CorrectChoice", fields: [correctChoiceId], references: [id])
+    correctChoiceId   Int?           @unique
+    category         PickemCategory  @relation(fields: [categoryId], references: [id])
+    categoryId       Int
+    contest          Contest         @relation(fields: [contestId], references: [id])
+    contestId        Int
+    userChoices      UserPickemChoice[]
+}
+
+model PickemChoice {
+    id               Int               @id @default(autoincrement())
+    text             String
+    pickem           Pickem           @relation(fields: [pickemId], references: [id])
+    pickemId         Int
+    userChoices      UserPickemChoice[]
+    owner            User             @relation(fields: [ownerId], references: [id])
+    ownerId          Int
+    correctFor       Pickem?          @relation(name: "CorrectChoice")
+}
+
+model UserPickemChoice {
+    id              Int           @id @default(autoincrement())
+    user            User          @relation(fields: [userId], references: [id])
+    userId          Int
+    pickemChoice    PickemChoice  @relation(fields: [pickemChoiceId], references: [id])
+    pickemChoiceId  Int
+    pickem          Pickem        @relation(fields: [pickemId], references: [id])
+    pickemId        Int
+
+    @@unique([userId, pickemId])
+}
