@@ -44,12 +44,17 @@ page SignupPage {
 }
 action createPickem {
   fn: import { createPickem } from "@src/actions.js",
-  entities: [Pickem, PickemChoice, User]
+  entities: [Pickem, PickemChoice, User, PickemCategory]
 }
 
 action createUserPickemChoice {
   fn: import { createUserPickemChoice } from "@src/actions.js",
-  entities: [User, PickemChoice, UserPickemChoice]
+  entities: [User, PickemChoice, UserPickemChoice, Pickem]
+}
+
+action updatePickemChoiceOwner {
+  fn: import { updatePickemChoiceOwner } from "@src/actions.js",
+  entities: [PickemChoice, User, Pickem]
 }
 
 action createContest {
@@ -62,19 +67,31 @@ action closePickem {
   entities: [Pickem, PickemChoice, User]
 }
 
+action bulkCreatePickems {
+  fn: import { bulkCreatePickems } from "@src/actions.js",
+  entities: [User, Contest, Pickem, PickemChoice, PickemCategory]
+}
+
+api bulkCreatePickemsApi {
+  fn: import { bulkCreatePickems } from "@src/apis.js",
+  httpRoute: (POST, "/bulk-create-pickems"),
+  entities: [User, Contest, Pickem, PickemChoice, PickemCategory],
+  auth: false
+}
+
 query getOpenPickems {
   fn: import { getOpenPickems } from "@src/queries.js",
-  entities: [Pickem]
+  entities: [Pickem, PickemCategory]
 }
 
 query getPickemChoices {
   fn: import { getPickemChoices } from "@src/queries.js",
-  entities: [PickemChoice]
+  entities: [PickemChoice, Pickem, PickemCategory]
 }
 
 query getUserPickemChoices {
   fn: import { getUserPickemChoices } from "@src/queries.js",
-  entities: [UserPickemChoice]
+  entities: [UserPickemChoice, Pickem, PickemCategory]
 }
 
 query getUserContests {

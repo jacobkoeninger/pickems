@@ -1,0 +1,753 @@
+{
+  "contestId": 1,
+  "pickems": [
+    {
+      "category": "US POLITICS (violent)",
+      "prediction1": {
+        "text": "Luigi free",
+        "owner": null
+      },
+      "prediction2": {
+        "text": "Luigi dead",
+        "owner": null
+      }
+    },
+    {
+      "category": "US POLITICS (violent)", 
+      "prediction1": {
+        "text": "Luigi on JRE",
+        "owner": "JF"
+      },
+      "prediction2": {
+        "text": "not",
+        "owner": null
+      }
+    },
+    {
+      "category": "US POLITICS (violent)",
+      "prediction1": {
+        "text": "Public turns on Luigi",
+        "owner": "JF"
+      },
+      "prediction2": {
+        "text": "not",
+        "owner": null
+      }
+    },
+    {
+      "category": "US POLITICS (violent)",
+      "prediction1": {
+        "text": "Capitol bombing",
+        "owner": "JK"
+      },
+      "prediction2": {
+        "text": "not",
+        "owner": null
+      }
+    },
+    {
+      "category": "US POLITICS (violent)",
+      "prediction1": {
+        "text": "Failed assassination attempt on Elon",
+        "owner": "JK"
+      },
+      "prediction2": {
+        "text": "not",
+        "owner": null
+      }
+    },
+    {
+      "category": "US POLITICS (violent)",
+      "prediction1": {
+        "text": "Successful assassination of tech CEO",
+        "owner": "JF"
+      },
+      "prediction2": {
+        "text": "not",
+        "owner": null
+      }
+    },
+    {
+      "category": "US POLITICS (violent)",
+      "prediction1": {
+        "text": "Assassination attempt by chemical",
+        "owner": "JF"
+      },
+      "prediction2": {
+        "text": "not",
+        "owner": null
+      }
+    },
+    {
+      "category": "US POLITICS (violent)",
+      "prediction1": {
+        "text": "Trump shot in significant way",
+        "owner": "JF"
+      },
+      "prediction2": {
+        "text": "No shots fired at Trump",
+        "owner": "JK"
+      }
+    },
+    {
+      "category": "US POLITICS (non-violent)",
+      "prediction1": {
+        "text": "Trump golf cart crash",
+        "owner": "JF"
+      },
+      "prediction2": {
+        "text": "not",
+        "owner": null
+      }
+    },
+    {
+      "category": "US POLITICS (non-violent)",
+      "prediction1": {
+        "text": "Trump removed from office by legal",
+        "owner": null
+      },
+      "prediction2": {
+        "text": "Trump death",
+        "owner": null
+      }
+    },
+    {
+      "category": "US POLITICS (non-violent)",
+      "prediction1": {
+        "text": "Elon political party",
+        "owner": "JK"
+      },
+      "prediction2": {
+        "text": "not",
+        "owner": null
+      }
+    },
+    {
+      "category": "US POLITICS (non-violent)",
+      "prediction1": {
+        "text": "Trump undoes Biden nicotine laws",
+        "owner": "JF"
+      },
+      "prediction2": {
+        "text": "not",
+        "owner": null
+      }
+    },
+    {
+      "category": "US POLITICS (non-violent)",
+      "prediction1": {
+        "text": "Big name fed in furry suit",
+        "owner": "JF"
+      },
+      "prediction2": {
+        "text": "big name conservative on grindr",
+        "owner": "JK"
+      }
+    },
+    {
+      "category": "US POLITICS (non-violent)",
+      "prediction1": {
+        "text": "Trump releases GOOD alien proof",
+        "owner": "JF"
+      },
+      "prediction2": {
+        "text": "Trump releases GOOD JFK stuff",
+        "owner": "JK"
+      }
+    },
+    {
+      "category": "US POLITICS (non-violent)",
+      "prediction1": {
+        "text": "Mortgage rates at 9%",
+        "owner": "DG"
+      },
+      "prediction2": {
+        "text": "not",
+        "owner": null
+      }
+    },
+    {
+      "category": "US POLITICS (non-violent)",
+      "prediction1": {
+        "text": "Federal social media ban by age",
+        "owner": "JK"
+      },
+      "prediction2": {
+        "text": "not",
+        "owner": null
+      }
+    },
+    {
+      "category": "US POLITICS (non-violent)",
+      "prediction1": {
+        "text": "BLM-level class protests",
+        "owner": "JK"
+      },
+      "prediction2": {
+        "text": "not",
+        "owner": null
+      }
+    },
+    {
+      "category": "INTERNATIONAL POLITICS",
+      "prediction1": {
+        "text": "Taiwan invaded by China",
+        "owner": "N8"
+      },
+      "prediction2": {
+        "text": "not",
+        "owner": null
+      }
+    },
+    {
+      "category": "INTERNATIONAL POLITICS",
+      "prediction1": {
+        "text": "Iran joins Palestine",
+        "owner": "N8"
+      },
+      "prediction2": {
+        "text": "not",
+        "owner": null
+      }
+    },
+    {
+      "category": "INTERNATIONAL POLITICS",
+      "prediction1": {
+        "text": "US boots on ground in Iran",
+        "owner": "JK"
+      },
+      "prediction2": {
+        "text": "not",
+        "owner": null
+      }
+    },
+    {
+      "category": "INTERNATIONAL POLITICS",
+      "prediction1": {
+        "text": "US gets Greenland: sneaky",
+        "owner": "JK"
+      },
+      "prediction2": {
+        "text": "directly",
+        "owner": "JF"
+      }
+    },
+    {
+      "category": "INTERNATIONAL POLITICS",
+      "prediction1": {
+        "text": "US reveals crazy new military tech",
+        "owner": "JK"
+      },
+      "prediction2": {
+        "text": "anyone reveals real mech",
+        "owner": "N8"
+      }
+    },
+    {
+      "category": "INTERNATIONAL POLITICS",
+      "prediction1": {
+        "text": "Big news when autonomous killing machine kills innocent",
+        "owner": "JK"
+      },
+      "prediction2": {
+        "text": "not",
+        "owner": null
+      }
+    },
+    {
+      "category": "INTERNATIONAL POLITICS",
+      "prediction1": {
+        "text": "Serbia goes bananas",
+        "owner": "JF"
+      },
+      "prediction2": {
+        "text": "No mainstream Serbia news",
+        "owner": "JK"
+      }
+    },
+    {
+      "category": "INTERNATIONAL POLITICS",
+      "prediction1": {
+        "text": "Coup in Europe",
+        "owner": "JF"
+      },
+      "prediction2": {
+        "text": "not",
+        "owner": null
+      }
+    },
+    {
+      "category": "INTERNATIONAL POLITICS",
+      "prediction1": {
+        "text": "Drones turn out to be China",
+        "owner": "JK"
+      },
+      "prediction2": {
+        "text": "Drones turn out to be US",
+        "owner": "JF"
+      }
+    },
+    {
+      "category": "INTERNATIONAL POLITICS",
+      "prediction1": {
+        "text": "Gaza hostage Americans plot twist",
+        "owner": "JK"
+      },
+      "prediction2": {
+        "text": "not",
+        "owner": null
+      }
+    },
+    {
+      "category": "INTERNATIONAL POLITICS",
+      "prediction1": {
+        "text": "Kim Jong Un death",
+        "owner": "N8"
+      },
+      "prediction2": {
+        "text": "not",
+        "owner": null
+      }
+    },
+    {
+      "category": "INTERNATIONAL POLITICS",
+      "prediction1": {
+        "text": "People in US military turn against leadership",
+        "owner": "JK"
+      },
+      "prediction2": {
+        "text": "not",
+        "owner": null
+      }
+    },
+    {
+      "category": "DISASTERS (natural)",
+      "prediction1": {
+        "text": "EMP by terrorism",
+        "owner": "N8"
+      },
+      "prediction2": {
+        "text": "EMP by solar flare",
+        "owner": "DG"
+      }
+    },
+    {
+      "category": "DISASTERS (natural)",
+      "prediction1": {
+        "text": "Crisis of a new STD",
+        "owner": "N8"
+      },
+      "prediction2": {
+        "text": "not",
+        "owner": null
+      }
+    },
+    {
+      "category": "DISASTERS (natural)",
+      "prediction1": {
+        "text": "An island of significance is gone",
+        "owner": "JF"
+      },
+      "prediction2": {
+        "text": "not",
+        "owner": null
+      }
+    },
+    {
+      "category": "DISASTERS (natural)",
+      "prediction1": {
+        "text": "Toilet-paper-eating insect spreads",
+        "owner": "DG"
+      },
+      "prediction2": {
+        "text": "not",
+        "owner": null
+      }
+    },
+    {
+      "category": "DISASTERS (human)",
+      "prediction1": {
+        "text": "Vegas shooting dethroned",
+        "owner": "JK"
+      },
+      "prediction2": {
+        "text": "not",
+        "owner": null
+      }
+    },
+    {
+      "category": "DISASTERS (human)",
+      "prediction1": {
+        "text": "9/11-level attack",
+        "owner": "JK"
+      },
+      "prediction2": {
+        "text": "not",
+        "owner": null
+      }
+    },
+    {
+      "category": "DISASTERS (human)",
+      "prediction1": {
+        "text": "Uncontacted tribe killed",
+        "owner": "DG"
+      },
+      "prediction2": {
+        "text": "not",
+        "owner": null
+      }
+    },
+    {
+      "category": "DISASTERS (human)",
+      "prediction1": {
+        "text": "US electric grid crisis",
+        "owner": "DG"
+      },
+      "prediction2": {
+        "text": "not",
+        "owner": null
+      }
+    },
+    {
+      "category": "DISASTERS (human)",
+      "prediction1": {
+        "text": "Big ship explodes",
+        "owner": "JF"
+      },
+      "prediction2": {
+        "text": "Plane explodes mid-air",
+        "owner": "N8"
+      }
+    },
+    {
+      "category": "DRUGS",
+      "prediction1": {
+        "text": "New bath salts type loophole drug",
+        "owner": "N8"
+      },
+      "prediction2": {
+        "text": "not",
+        "owner": null
+      }
+    },
+    {
+      "category": "DRUGS",
+      "prediction1": {
+        "text": "Ozempic terrible side effect",
+        "owner": "DG"
+      },
+      "prediction2": {
+        "text": "Ozempic banned",
+        "owner": "JF"
+      }
+    },
+    {
+      "category": "DRUGS",
+      "prediction1": {
+        "text": "Kratom illegal",
+        "owner": "DG"
+      },
+      "prediction2": {
+        "text": "not",
+        "owner": null
+      }
+    },
+    {
+      "category": "DRUGS",
+      "prediction1": {
+        "text": "Federal legal weed",
+        "owner": null
+      },
+      "prediction2": {
+        "text": "weed legal->illegal state",
+        "owner": null
+      }
+    },
+    {
+      "category": "POP CULTURE",
+      "prediction1": {
+        "text": "Viral 2-headed dog",
+        "owner": "DG"
+      },
+      "prediction2": {
+        "text": "not",
+        "owner": null
+      }
+    },
+    {
+      "category": "POP CULTURE",
+      "prediction1": {
+        "text": "Hawk Tuah girl biopic",
+        "owner": "N8"
+      },
+      "prediction2": {
+        "text": "Hawk Tuah girl convicted",
+        "owner": "JF"
+      }
+    },
+    {
+      "category": "POP CULTURE",
+      "prediction1": {
+        "text": "Hawk Tuah onlyfans",
+        "owner": "JK"
+      },
+      "prediction2": {
+        "text": "not",
+        "owner": null
+      }
+    },
+    {
+      "category": "POP CULTURE",
+      "prediction1": {
+        "text": "Major celebrity implicated in Diddy stuff",
+        "owner": "N8"
+      },
+      "prediction2": {
+        "text": "Diddy stuff under the rug",
+        "owner": "JK"
+      }
+    },
+    {
+      "category": "POP CULTURE",
+      "prediction1": {
+        "text": "Tom Holland and Zendaya married",
+        "owner": "JF"
+      },
+      "prediction2": {
+        "text": "not",
+        "owner": null
+      }
+    },
+    {
+      "category": "POP CULTURE",
+      "prediction1": {
+        "text": "Sydney Sweeney sex tape",
+        "owner": "N8"
+      },
+      "prediction2": {
+        "text": "not",
+        "owner": null
+      }
+    },
+    {
+      "category": "POP CULTURE",
+      "prediction1": {
+        "text": "Danny DeVito dead",
+        "owner": "N8"
+      },
+      "prediction2": {
+        "text": "Danny DeVito sex scandal",
+        "owner": "JF"
+      }
+    },
+    {
+      "category": "POP CULTURE",
+      "prediction1": {
+        "text": "Bill Cosby dead",
+        "owner": "DG"
+      },
+      "prediction2": {
+        "text": "not",
+        "owner": null
+      }
+    },
+    {
+      "category": "POP CULTURE",
+      "prediction1": {
+        "text": "Morgan Freeman dead",
+        "owner": "N8"
+      },
+      "prediction2": {
+        "text": "not",
+        "owner": null
+      }
+    },
+    {
+      "category": "POP CULTURE",
+      "prediction1": {
+        "text": "Ed Sheeran suicide",
+        "owner": "JF"
+      },
+      "prediction2": {
+        "text": "not",
+        "owner": null
+      }
+    },
+    {
+      "category": "POP CULTURE",
+      "prediction1": {
+        "text": "Trump sex tape",
+        "owner": "JF"
+      },
+      "prediction2": {
+        "text": "not",
+        "owner": null
+      }
+    },
+    {
+      "category": "POP CULTURE",
+      "prediction1": {
+        "text": "Flat-earther in the mainstram",
+        "owner": "JF"
+      },
+      "prediction2": {
+        "text": "not",
+        "owner": null
+      }
+    },
+    {
+      "category": "MEDIA",
+      "prediction1": {
+        "text": "Ubisoft bankrupt",
+        "owner": "JK"
+      },
+      "prediction2": {
+        "text": "not",
+        "owner": null
+      }
+    },
+    {
+      "category": "MEDIA",
+      "prediction1": {
+        "text": "Nightreign flop",
+        "owner": null
+      },
+      "prediction2": {
+        "text": "not",
+        "owner": null
+      }
+    },
+    {
+      "category": "MEDIA",
+      "prediction1": {
+        "text": "New Fortnite",
+        "owner": null
+      },
+      "prediction2": {
+        "text": "new Roblox",
+        "owner": null
+      }
+    },
+    {
+      "category": "MEDIA",
+      "prediction1": {
+        "text": "Big game by China",
+        "owner": null
+      },
+      "prediction2": {
+        "text": "Big game by Russia",
+        "owner": null
+      }
+    },
+    {
+      "category": "MEDIA",
+      "prediction1": {
+        "text": "Payday 3 unplugged",
+        "owner": "JF"
+      },
+      "prediction2": {
+        "text": "not",
+        "owner": null
+      }
+    },
+    {
+      "category": "MEDIA",
+      "prediction1": {
+        "text": "TES6 release date",
+        "owner": "JF"
+      },
+      "prediction2": {
+        "text": "HL3 announced",
+        "owner": "JK"
+      }
+    },
+    {
+      "category": "MEDIA",
+      "prediction1": {
+        "text": "Halo 1 remaster",
+        "owner": "N8"
+      },
+      "prediction2": {
+        "text": "not",
+        "owner": null
+      }
+    },
+    {
+      "category": "MEDIA",
+      "prediction1": {
+        "text": "Discord bankrupt/acquired",
+        "owner": "JF"
+      },
+      "prediction2": {
+        "text": "not",
+        "owner": null
+      }
+    },
+    {
+      "category": "TECHNOLOGY",
+      "prediction1": {
+        "text": "First neuralink death",
+        "owner": "JF"
+      },
+      "prediction2": {
+        "text": "First neuralink porn",
+        "owner": "N8"
+      }
+    },
+    {
+      "category": "TECHNOLOGY",
+      "prediction1": {
+        "text": "Innovative new male sex toy",
+        "owner": "N8"
+      },
+      "prediction2": {
+        "text": "not",
+        "owner": null
+      }
+    },
+    {
+      "category": "TECHNOLOGY",
+      "prediction1": {
+        "text": "Life on Mars for real",
+        "owner": "N8"
+      },
+      "prediction2": {
+        "text": "not",
+        "owner": null
+      }
+    },
+    {
+      "category": "TECHNOLOGY",
+      "prediction1": {
+        "text": "AI interactive porn",
+        "owner": "JF"
+      },
+      "prediction2": {
+        "text": "not",
+        "owner": null
+      }
+    },
+    {
+      "category": "TECHNOLOGY",
+      "prediction1": {
+        "text": "AI makes a significant discovery",
+        "owner": "JF"
+      },
+      "prediction2": {
+        "text": "not",
+        "owner": null
+      }
+    },
+    {
+      "category": "META",
+      "prediction1": {
+        "text": "N8 takes a shit that makes JMF puke",
+        "owner": "N8"
+      },
+      "prediction2": {
+        "text": "not",
+        "owner": null
+      }
+    }
+  ]
+}

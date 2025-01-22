@@ -11,9 +11,9 @@ const PickemPage = () => {
   const createUserPickemChoiceFn = useAction(createUserPickemChoice);
   const [selectedContest, setSelectedContest] = useState(null);
   const [currentPickemIndex, setCurrentPickemIndex] = useState(0);
-  const [viewMode, setViewMode] = useState('single');
+  const [viewMode, setViewMode] = useState('paged');
   const [currentPage, setCurrentPage] = useState(0);
-  const itemsPerPage = 10;
+  const itemsPerPage = 5;
 
   if (contestsLoading || pickemsLoading) return <div className="text-green-500 font-mono">[LOADING...]</div>;
   if (contestsError) return <div className="text-red-500 font-mono">[ERROR]: {contestsError}</div>;
@@ -22,7 +22,125 @@ const PickemPage = () => {
 
   const filteredPickems = selectedContest ? pickems?.filter(pickem => pickem.contestId === selectedContest.id) : [];
 
-  if (selectedContest && !filteredPickems?.length) {
+  const isContestActive = (contest) => {
+    const deadline = new Date(contest.deadline);
+    return deadline > new Date();
+  };
+
+  // Show contests, active predictions and leaderboard if no contest is selected
+  if (!selectedContest) {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-7xl mx-auto">
+        <div>
+          <h2 className="text-xl font-mono text-green-500 mb-6 glitch-text">&gt; ACTIVE_CONTESTS:</h2>
+          <div className="space-y-4">
+            {contests.map(contest => {
+              const active = isContestActive(contest);
+              return (
+                <button
+                  key={contest.id}
+                  onClick={() => active && setSelectedContest(contest)}
+                  disabled={!active}
+                  className={`w-full py-4 px-6 border rounded transition-all duration-200 
+                             flex items-center justify-between group font-mono
+                             ${active 
+                               ? 'border-green-500 bg-black hover:bg-green-500/10 text-green-500 hover:shadow-[0_0_10px_rgba(34,197,94,0.5)]'
+                               : 'border-red-500 bg-black/50 text-red-500 cursor-not-allowed'
+                             }`}
+                >
+                  <span className="flex items-center">
+                    <span className="mr-2">&gt;</span>
+                    {contest.name}
+                  </span>
+                  <div className="text-right">
+                    {active ? (
+                      <>
+                        <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                          _SELECT
+                        </span>
+                        <div className="text-xs mt-1">
+                          DEADLINE: {new Date(contest.deadline).toLocaleDateString()}
+                        </div>
+                      </>
+                    ) : (
+                      <span className="text-xs">[EXPIRED]</span>
+                    )}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        <div>
+          <h2 className="text-xl font-mono text-green-500 mb-6 glitch-text">&gt; RECENT_PREDICTIONS:</h2>
+          <div className="space-y-4">
+            {pickems?.slice(0, 5).map(pickem => (
+              <div key={pickem.id} className="border border-green-500 rounded p-4 font-mono">
+                <div className="text-sm text-green-400 mb-2 flex justify-between">
+                  <span>[{pickem.category || 'UNCATEGORIZED'}]</span>
+                  <span>[CREATED: {new Date(pickem.createdAt).toLocaleDateString()}]</span>
+                </div>
+                <div className="text-green-500">
+                  {pickem.choices.map(choice => (
+                    <div key={choice.id} className="ml-4">
+                      &gt; {choice.text}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div>
+          <h2 className="text-xl font-mono text-green-500 mb-6 glitch-text">&gt; LEADERBOARD:</h2>
+          <div className="border border-green-500 rounded p-4 font-mono">
+            <div className="space-y-2">
+              {[...Array(10)].map((_, i) => (
+                <div key={i} className="flex justify-between items-center text-green-500">
+                  <div className="flex items-center">
+                    <span className="w-8">{i + 1}.</span>
+                    <span className="text-green-400">USER_{i + 1}</span>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-green-300">{1000 - (i * 50)} PTS</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="mt-4 pt-4 border-t border-green-500">
+              <div className="flex justify-between items-center text-green-500">
+                <div className="flex items-center">
+                  <span className="w-8">YOU</span>
+                  <span className="text-green-400">{user.username}</span>
+                </div>
+                <div className="text-right">
+                  <span className="text-green-300">{user.points || 0} PTS</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isContestActive(selectedContest)) {
+    return (
+      <div className="max-w-2xl mx-auto">
+        <button
+          onClick={() => setSelectedContest(null)}
+          className="mb-4 px-4 py-2 font-mono text-green-500 hover:text-black border border-green-500 hover:bg-green-500 rounded transition-all duration-200"
+        >
+          &lt; RETURN_TO_CONTESTS
+        </button>
+        <div className="text-red-500 font-mono">[CONTEST_DEADLINE_PASSED]</div>
+      </div>
+    );
+  }
+
+  if (!filteredPickems?.length) {
     return (
       <div className="max-w-2xl mx-auto">
         <button
@@ -36,33 +154,6 @@ const PickemPage = () => {
     );
   }
 
-  if (!selectedContest) {
-    return (
-      <div className="max-w-2xl mx-auto">
-        <h2 className="text-xl font-mono text-green-500 mb-6 glitch-text">&gt; SELECT_CONTEST:</h2>
-        <div className="space-y-4">
-          {contests.map(contest => (
-            <button
-              key={contest.id}
-              onClick={() => setSelectedContest(contest)}
-              className="w-full py-4 px-6 border border-green-500 rounded transition-all duration-200 
-                         bg-black hover:bg-green-500/10 text-green-500 hover:shadow-[0_0_10px_rgba(34,197,94,0.5)]
-                         flex items-center justify-between group font-mono"
-            >
-              <span className="flex items-center">
-                <span className="mr-2">&gt;</span>
-                {contest.name}
-              </span>
-              <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                _SELECT
-              </span>
-            </button>
-          ))}
-        </div>
-      </div>
-    );
-  }
-
   const currentPickem = filteredPickems[currentPickemIndex];
   const totalPages = Math.ceil(filteredPickems.length / itemsPerPage);
   const paginatedPickems = filteredPickems.slice(
@@ -71,6 +162,9 @@ const PickemPage = () => {
   );
 
   const handleChoice = async (pickemChoiceId) => {
+    if (!isContestActive(selectedContest)) {
+      return;
+    }
     await createUserPickemChoiceFn({ userId: user.id, pickemChoiceId });
     if (viewMode === 'single' && currentPickemIndex < filteredPickems.length - 1) {
       setCurrentPickemIndex(currentPickemIndex + 1);
