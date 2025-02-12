@@ -5,6 +5,7 @@ export const getOpenPickems = async (args, context) => {
   return context.entities.Pickem.findMany({
     where: { correctChoiceId: null },
     include: { 
+      category: true,
       choices: {
         select: {
           id: true,
@@ -163,6 +164,7 @@ export const getContests = async (args, context) => {
     include: {
       pickems: {
         include: {
+          category: true,
           choices: true
         }
       }

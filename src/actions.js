@@ -1,6 +1,48 @@
 import { HttpError } from 'wasp/server'
 
 /**
+ * Deletes a contest and all its associated pickems.
+ *
+ * @param {Object} args - The contest details.
+ * @param {string} args.contestId - The ID of the contest to delete.
+ * @param {Object} context - Contains user information and database entities.
+ * @throws {HttpError} If the user is not authenticated or is not an admin.
+ * @returns {Promise<void>}
+ */
+export const deleteContest = async ({ contestId }, context) => {
+  if (!context.user) { throw new HttpError(401) }
+  if (!context.user.isAdmin) { throw new HttpError(403, 'Only admins can delete contests') }
+
+  // Delete all associated user choices first
+  await context.entities.UserPickemChoice.deleteMany({
+    where: {
+      pickem: {
+        contestId
+      }
+    }
+  });
+
+  // Delete all pickem choices
+  await context.entities.PickemChoice.deleteMany({
+    where: {
+      pickem: {
+        contestId
+      }
+    }
+  });
+
+  // Delete all pickems associated with the contest
+  await context.entities.Pickem.deleteMany({
+    where: { contestId }
+  });
+
+  // Finally delete the contest
+  await context.entities.Contest.delete({
+    where: { id: contestId }
+  });
+}
+
+/**
  * Creates a new contest.
  *
  * @param {Object} args - The contest details.
@@ -234,74 +276,115 @@ export const closePickem = async ({ pickemId, correctChoiceId }, context) => {
   });
 };
 
-export const bulkCreatePickems = async (pickems, context) => {
+export const bulkCreatePickems = async (data, context) => {
   if (!context.user?.isAdmin) { throw new HttpError(403) }
 
-  const createdPickems = []
-
-  for (const pickem of pickems) {
-    // Create the choices first
-    const choices = []
-    
-    if (pickem.prediction1) {
-      choices.push({
-        text: pickem.prediction1.text,
-        owner: pickem.prediction1.ownerId ? {
-          connect: { id: pickem.prediction1.ownerId }
-        } : undefined
-      })
-    }
-
-    if (pickem.prediction2) {
-      choices.push({
-        text: pickem.prediction2.text,
-        owner: pickem.prediction2.ownerId ? {
-          connect: { id: pickem.prediction2.ownerId }
-        } : undefined
-      })
-    }
-
-    // Find or create the category
-    let category = await context.entities.PickemCategory.findFirst({
-      where: {
-        name: pickem.category
-      }
-    })
-
-    if (!category) {
-      category = await context.entities.PickemCategory.create({
-        data: {
-          name: pickem.category
-        }
-      })
-    }
-
-    // Create the pickem with its choices
-    const created = await context.entities.Pickem.create({
-      data: {
-        category: {
-          connect: {
-            id: category.id
-          }
-        },
-        contest: {
-          connect: {
-            id: pickem.contestId
-          }
-        },
-        choices: {
-          create: choices
-        }
-      },
-      include: {
-        choices: true,
-        category: true,
-        contest: true
-      }
-    })
-
-    createdPickems.push(created)
+  // Validate input format
+  if (!data || !Array.isArray(data.pickems)) {
+    throw new Error('Invalid pickems format');
   }
 
-  return createdPickems
-}
+  if (!data.contestId) {
+    throw new Error('Contest ID is required');
+  }
+
+  // Verify contest exists
+  const contest = await context.entities.Contest.findUnique({
+    where: { id: parseInt(data.contestId) }
+  });
+
+  if (!contest) {
+    throw new Error(`Contest with ID ${data.contestId} not found`);
+  }
+
+  const createdPickems = [];
+  // Cache for categories to avoid multiple DB lookups
+  const categoryCache = new Map();
+
+  for (const pickem of data.pickems) {
+    try {
+      // Validate required fields
+      if (!pickem.category || !pickem.prediction1?.text || !pickem.prediction2?.text) {
+        throw new Error('Invalid pickem data: missing required fields');
+      }
+
+      // Get or create category using cache
+      let category;
+      if (categoryCache.has(pickem.category)) {
+        category = categoryCache.get(pickem.category);
+      } else {
+        // Try to find existing category
+        category = await context.entities.PickemCategory.findFirst({
+          where: { name: pickem.category }
+        });
+
+        // Create category if it doesn't exist
+        if (!category) {
+          console.log(`Creating new category: ${pickem.category}`);
+          category = await context.entities.PickemCategory.create({
+            data: {
+              name: pickem.category,
+              description: null, // Can be updated later if needed
+              isActive: true
+            }
+          });
+        }
+
+        // Add to cache
+        categoryCache.set(pickem.category, category);
+      }
+
+      if (!category) {
+        throw new Error(`Failed to create/find category: ${pickem.category}`);
+      }
+
+      // Create the choices array
+      const choices = [
+        {
+          text: pickem.prediction1.text,
+          nickname: pickem.prediction1.owner
+        },
+        {
+          text: pickem.prediction2.text,
+          nickname: pickem.prediction2.owner
+        }
+      ];
+
+      // Create the pickem with its choices
+      const created = await context.entities.Pickem.create({
+        data: {
+          category: {
+            connect: {
+              id: category.id
+            }
+          },
+          contest: {
+            connect: {
+              id: parseInt(data.contestId)
+            }
+          },
+          choices: {
+            create: choices
+          }
+        },
+        include: {
+          choices: true,
+          category: true,
+          contest: true
+        }
+      });
+
+      console.log(`Created pickem in category '${category.name}' with ID: ${created.id}`);
+      createdPickems.push(created);
+    } catch (error) {
+      console.error(`Error creating pickem: ${error.message}`, {
+        category: pickem.category,
+        prediction1: pickem.prediction1.text,
+        prediction2: pickem.prediction2.text
+      });
+      throw error; // Re-throw to handle at higher level
+    }
+  }
+
+  return createdPickems;
+};

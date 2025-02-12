@@ -85,7 +85,7 @@ const PickemPage = () => {
                 'border-green-500'
               }`}>
                 <div className="text-sm text-green-400 mb-2 flex justify-between">
-                  <span>[{pickem.category || 'UNCATEGORIZED'}]</span>
+                  <span>[{pickem.category?.name || 'UNCATEGORIZED'}]</span>
                   <span className={
                     pickem.status === 'CLOSED' ? 'text-yellow-500' :
                     pickem.status === 'CANCELLED' ? 'text-red-500' :
@@ -216,7 +216,7 @@ const PickemPage = () => {
           'border-red-500 shadow-[0_0_15px_rgba(239,68,68,0.2)]'
         }`}>
           <div className="text-sm font-mono mb-2 flex justify-between">
-            <span className="text-green-400">[CATEGORY]: {pickem.category}</span>
+            <span className="text-green-400">[CATEGORY]: {pickem.category?.name || 'UNCATEGORIZED'}</span>
             <span className={
               pickem.status === 'CLOSED' ? 'text-yellow-500' : 'text-red-500'
             }>[{pickem.status}]</span>
@@ -255,7 +255,7 @@ const PickemPage = () => {
       <div key={pickem.id} className="bg-black border border-green-500 rounded p-6 mb-4 shadow-[0_0_15px_rgba(34,197,94,0.2)]">
         {pickem.category && (
           <div className="text-sm text-green-400 font-mono mb-2 flex justify-between">
-            <span>[CATEGORY]: {pickem.category}</span>
+            <span>[CATEGORY]: {pickem.category?.name || 'UNCATEGORIZED'}</span>
             <span>[{pickem.status}]</span>
           </div>
         )}

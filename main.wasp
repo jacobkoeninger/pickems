@@ -62,6 +62,11 @@ action createContest {
   entities: [Contest, Pickem, PickemChoice, User]
 }
 
+action deleteContest {
+  fn: import { deleteContest } from "@src/actions.js",
+  entities: [Contest, Pickem, PickemChoice, UserPickemChoice]
+}
+
 action closePickem {
   fn: import { closePickem } from "@src/actions.js",
   entities: [Pickem, PickemChoice, User]
