@@ -1,12 +1,55 @@
+# Dependencies
 .wasp/
 node_modules/
-src/parsed_pickems.json
+*.log
+npm-debug.log*
 
-# Ignore all dotenv files by default to prevent accidentally committing any secrets.
-# To include specific dotenv files, use the `!` operator or adjust these rules.
+# Environment variables and secrets
 .env
 .env.*
+.env.server
+.env.*.local
+*.pem
+*.key
+*.cert
+*.p12
 
-# Don't ignore example dotenv files.
+# Ignore all dotenv files by default to prevent accidentally committing any secrets
+# To include specific dotenv files, use the `!` operator
 !.env.example
 !.env.*.example
+
+# Database
+*.sqlite
+*.sqlite3
+*.db
+
+# Build output
+dist/
+build/
+.output/
+
+# IDE and editor files
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Application specific
+src/parsed_pickems.json
+**/config/secrets.*
+**/credentials.*
+**/*_credentials.*
+**/*_secret.*
+
+# Logs and debugging
+logs/
+*.log
+debug/
+.debug/
+
+# Testing
+coverage/
+.nyc_output/
