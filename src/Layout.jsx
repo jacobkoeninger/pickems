@@ -1,15 +1,46 @@
 import { Link } from "wasp/client/router";
 import { useAuth, logout } from "wasp/client/auth";
 import { Outlet } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { setUserNickname, applyNickname } from './auth/nicknames';
+import { NicknameSelector } from './components/NicknameSelector';
 import "./Main.css";
 
 export const Layout = () => {
   const { data: user } = useAuth();
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [showNicknameSelector, setShowNicknameSelector] = useState(false);
+
+  useEffect(() => {
+    const checkNickname = async () => {
+      if (user && !user.nickname) {
+        const result = await setUserNickname(user, window.wasp.api.internal)
+        if (result.needsManualSelection) {
+          setShowNicknameSelector(true)
+        }
+      }
+    }
+    checkNickname()
+  }, [user])
+
+  const handleNicknameSelect = async (nickname) => {
+    const result = await applyNickname(user.id, nickname, window.wasp.api.internal)
+    if (result.success) {
+      setShowNicknameSelector(false)
+      // Force reload to update user data
+      window.location.reload()
+    }
+  }
 
   return (
     <div className="min-h-screen bg-black text-green-500">
+      {showNicknameSelector && (
+        <NicknameSelector 
+          onSelect={handleNicknameSelect}
+          onClose={() => setShowNicknameSelector(false)}
+        />
+      )}
+
       <header className="bg-black border-b border-green-500 shadow-[0_0_15px_rgba(34,197,94,0.3)]">
         <div className="max-w-5xl mx-auto px-6 py-4 flex justify-between items-center">
           <Link to="/">
@@ -21,6 +52,11 @@ export const Layout = () => {
                 <span className="px-3 py-1 bg-green-500 text-black rounded font-mono mr-2 shadow-[0_0_10px_rgba(34,197,94,0.5)]">
                   ⚡ {user.points} pts
                 </span>
+                {user.nickname && (
+                  <span className="px-3 py-1 border border-green-500 text-green-500 rounded font-mono mr-2">
+                    [{user.nickname}]
+                  </span>
+                )}
                 <button 
                   onClick={() => setDropdownOpen(!dropdownOpen)}
                   className="px-3 py-1 font-mono text-green-500 hover:text-black border border-green-500 hover:bg-green-500 rounded transition-all duration-200 ease-in-out flex items-center hover:shadow-[0_0_10px_rgba(34,197,94,0.5)]"
@@ -28,11 +64,11 @@ export const Layout = () => {
                   {user.avatarUrl && (
                     <img 
                       src={user.avatarUrl} 
-                      alt="Avatar"
+                      alt=""
                       className="w-6 h-6 rounded-full mr-2"
                     />
                   )}
-                  <span className="mr-1">&gt;</span>{user.identities.username?.id}
+                  <span className="mr-1">&gt;</span>{user.username}
                   <svg className={`w-4 h-4 ml-2 transition-transform ${dropdownOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                   </svg>

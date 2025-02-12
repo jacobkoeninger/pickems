@@ -1,18 +1,30 @@
 import { useState } from 'react';
 import { useAuth } from 'wasp/client/auth';
-import { useQuery } from 'wasp/client/operations';
-import { getUserContests, getUserPickemChoices, getUserContestPoints, getUserContestCorrectPicks, getUserContestIncorrectPicks } from 'wasp/client/operations';
+import { useQuery, useAction } from 'wasp/client/operations';
+import { getUserContests, getUserPickemChoices, getUserContestPoints, getUserContestCorrectPicks, getUserContestIncorrectPicks, updateUser } from 'wasp/client/operations';
 
 const Settings = () => {
   const { data: user } = useAuth();
   const { data: contests } = useQuery(getUserContests);
   const { data: userChoices } = useQuery(getUserPickemChoices);
-  const [username, setUsername] = useState(user?.identities.username?.id || '');
+  const updateUserFn = useAction(updateUser);
+
+  const [username, setUsername] = useState(user?.username || '');
+  const [nickname, setNickname] = useState(user?.nickname || '');
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // TODO: Add update user functionality once backend support is added
-    console.log('Update user:', { username });
+    setError('');
+    setSuccess('');
+    
+    try {
+      await updateUserFn({ username, nickname });
+      setSuccess('PROFILE_UPDATED_SUCCESSFULLY');
+    } catch (err) {
+      setError(err.message || 'UPDATE_FAILED');
+    }
   };
 
   if (!user || !contests || !userChoices) return 'LOADING...';
@@ -27,8 +39,20 @@ const Settings = () => {
       <div className="border border-green-500 rounded bg-black p-6 shadow-[0_0_15px_rgba(34,197,94,0.3)]">
         <h2 className="text-xl font-mono mb-4 text-green-400">&gt; USER_SETTINGS</h2>
         
-        <form onSubmit={handleSubmit}>
-          <div className="mb-4">
+        {error && (
+          <div className="mb-4 p-3 border border-red-500 rounded text-red-500 font-mono">
+            [ERROR]: {error}
+          </div>
+        )}
+        
+        {success && (
+          <div className="mb-4 p-3 border border-green-500 rounded text-green-500 font-mono">
+            [SUCCESS]: {success}
+          </div>
+        )}
+        
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
             <label className="block text-green-400 text-sm font-mono mb-2">
               &gt; HANDLE
             </label>
@@ -41,9 +65,25 @@ const Settings = () => {
             />
           </div>
 
+          <div>
+            <label className="block text-green-400 text-sm font-mono mb-2">
+              &gt; NICKNAME
+            </label>
+            <input
+              type="text"
+              value={nickname}
+              onChange={(e) => setNickname(e.target.value)}
+              className="w-full py-2 px-3 bg-black border border-green-500 rounded text-green-500 font-mono focus:outline-none focus:border-green-400 focus:shadow-[0_0_10px_rgba(34,197,94,0.5)]"
+              placeholder="ENTER_NICKNAME"
+            />
+            <p className="mt-1 text-xs text-green-400 font-mono opacity-75">
+              * Optional. This will be your display name in pickems.
+            </p>
+          </div>
+
           <button
             type="submit"
-            className="bg-green-500 hover:bg-green-400 text-black font-mono py-2 px-4 rounded transition-colors"
+            className="w-full py-2 px-4 font-mono text-green-500 hover:text-black border border-green-500 hover:bg-green-500 rounded transition-all duration-200"
           >
             EXECUTE_UPDATE
           </button>

@@ -13,62 +13,80 @@ model User {
     id               Int               @id @default(autoincrement())
     createdAt        DateTime          @default(now())
 
-    username    String @unique
-    displayName String
-    nickname    String? @unique
-    avatarUrl     String?
+    username         String            @unique
+    displayName      String
+    nickname         String?           // Two initials or null
+    avatarUrl        String?
 
-    points           Int              @default(0)
-    isAdmin          Boolean          @default(false)
-    ownedChoices     PickemChoice[]
+    points           Int               @default(0)
+    isAdmin          Boolean           @default(false)
     userPickemChoices UserPickemChoice[]
 }
 
 model Contest {
     id              Int              @id @default(autoincrement())
     createdAt       DateTime         @default(now())
+    updatedAt       DateTime         @updatedAt
     name            String
     description     String?
     deadline        DateTime
+    isActive        Boolean          @default(true)
     pickems         Pickem[]
+
+    @@index([isActive])
 }
 
 model PickemCategory {
     id              Int              @id @default(autoincrement())
     createdAt       DateTime         @default(now())
+    updatedAt       DateTime         @updatedAt
     name            String           @unique
     description     String?
+    sortOrder       Int              @default(0)
+    isActive        Boolean          @default(true)
     pickems         Pickem[]
+
+    @@index([isActive, sortOrder])
 }
 
 model Pickem {
     id                 Int           @id @default(autoincrement())
     createdAt         DateTime       @default(now())
+    updatedAt         DateTime       @updatedAt
+    status            String         @default("OPEN") // OPEN, CLOSED, CANCELLED
     choices           PickemChoice[]
     correctChoice     PickemChoice?  @relation(name: "CorrectChoice", fields: [correctChoiceId], references: [id])
-    correctChoiceId   Int?           @unique
+    correctChoiceId   Int?          @unique
     category         PickemCategory  @relation(fields: [categoryId], references: [id])
     categoryId       Int
     contest          Contest         @relation(fields: [contestId], references: [id])
     contestId        Int
     userChoices      UserPickemChoice[]
+
+    @@index([status])
+    @@index([contestId])
+    @@index([categoryId])
 }
 
 model PickemChoice {
     id               Int               @id @default(autoincrement())
     createdAt        DateTime          @default(now())
+    updatedAt        DateTime          @updatedAt
     text             String
+    description      String?
     pickem           Pickem           @relation(fields: [pickemId], references: [id])
     pickemId         Int
     userChoices      UserPickemChoice[]
-    owner            User?            @relation(fields: [ownerId], references: [id])
-    ownerId          Int?
+    nickname         String?          // Store the nickname from bulk upload
     correctFor       Pickem?          @relation(name: "CorrectChoice")
+
+    @@index([pickemId])
 }
 
 model UserPickemChoice {
     id              Int           @id @default(autoincrement())
     createdAt       DateTime      @default(now())
+    updatedAt       DateTime      @updatedAt
     user            User?         @relation(fields: [userId], references: [id])
     userId          Int?
     pickemChoice    PickemChoice  @relation(fields: [pickemChoiceId], references: [id])
@@ -77,4 +95,7 @@ model UserPickemChoice {
     pickemId        Int
 
     @@unique([userId, pickemId])
+    @@index([userId])
+    @@index([pickemId])
+    @@index([pickemChoiceId])
 }

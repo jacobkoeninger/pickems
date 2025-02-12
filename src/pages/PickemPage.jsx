@@ -23,8 +23,7 @@ const PickemPage = () => {
   const filteredPickems = selectedContest ? pickems?.filter(pickem => pickem.contestId === selectedContest.id) : [];
 
   const isContestActive = (contest) => {
-    const deadline = new Date(contest.deadline);
-    return deadline > new Date();
+    return contest.isActive && new Date(contest.deadline) > new Date();
   };
 
   // Show contests, active predictions and leaderboard if no contest is selected
@@ -45,7 +44,9 @@ const PickemPage = () => {
                              flex items-center justify-between group font-mono
                              ${active 
                                ? 'border-green-500 bg-black hover:bg-green-500/10 text-green-500 hover:shadow-[0_0_10px_rgba(34,197,94,0.5)]'
-                               : 'border-red-500 bg-black/50 text-red-500 cursor-not-allowed'
+                               : !contest.isActive
+                                 ? 'border-red-500 bg-black/50 text-red-500 cursor-not-allowed'
+                                 : 'border-yellow-500 bg-black/50 text-yellow-500 cursor-not-allowed'
                              }`}
                 >
                   <span className="flex items-center">
@@ -63,7 +64,9 @@ const PickemPage = () => {
                         </div>
                       </>
                     ) : (
-                      <span className="text-xs">[EXPIRED]</span>
+                      <span className="text-xs">
+                        [{!contest.isActive ? 'INACTIVE' : 'EXPIRED'}]
+                      </span>
                     )}
                   </div>
                 </button>
@@ -76,17 +79,31 @@ const PickemPage = () => {
           <h2 className="text-xl font-mono text-green-500 mb-6 glitch-text">&gt; RECENT_PREDICTIONS:</h2>
           <div className="space-y-4">
             {pickems?.slice(0, 5).map(pickem => (
-              <div key={pickem.id} className="border border-green-500 rounded p-4 font-mono">
+              <div key={pickem.id} className={`border rounded p-4 font-mono ${
+                pickem.status === 'CLOSED' ? 'border-yellow-500' :
+                pickem.status === 'CANCELLED' ? 'border-red-500' :
+                'border-green-500'
+              }`}>
                 <div className="text-sm text-green-400 mb-2 flex justify-between">
                   <span>[{pickem.category || 'UNCATEGORIZED'}]</span>
-                  <span>[CREATED: {new Date(pickem.createdAt).toLocaleDateString()}]</span>
+                  <span className={
+                    pickem.status === 'CLOSED' ? 'text-yellow-500' :
+                    pickem.status === 'CANCELLED' ? 'text-red-500' :
+                    'text-green-500'
+                  }>[{pickem.status}]</span>
                 </div>
                 <div className="text-green-500">
                   {pickem.choices.map(choice => (
                     <div key={choice.id} className="ml-4">
                       &gt; {choice.text}
+                      {choice.description && (
+                        <div className="text-xs ml-6 opacity-75">{choice.description}</div>
+                      )}
                     </div>
                   ))}
+                </div>
+                <div className="text-xs mt-2 opacity-75">
+                  Updated: {new Date(pickem.updatedAt).toLocaleDateString()}
                 </div>
               </div>
             ))}
@@ -135,7 +152,9 @@ const PickemPage = () => {
         >
           &lt; RETURN_TO_CONTESTS
         </button>
-        <div className="text-red-500 font-mono">[CONTEST_DEADLINE_PASSED]</div>
+        <div className="text-red-500 font-mono">
+          [{!selectedContest.isActive ? 'CONTEST_INACTIVE' : 'CONTEST_DEADLINE_PASSED'}]
+        </div>
       </div>
     );
   }
@@ -190,11 +209,54 @@ const PickemPage = () => {
   };
 
   const renderPickemChoice = (pickem) => {
+    if (pickem.status !== 'OPEN') {
+      return (
+        <div key={pickem.id} className={`bg-black border rounded p-6 mb-4 ${
+          pickem.status === 'CLOSED' ? 'border-yellow-500 shadow-[0_0_15px_rgba(234,179,8,0.2)]' :
+          'border-red-500 shadow-[0_0_15px_rgba(239,68,68,0.2)]'
+        }`}>
+          <div className="text-sm font-mono mb-2 flex justify-between">
+            <span className="text-green-400">[CATEGORY]: {pickem.category}</span>
+            <span className={
+              pickem.status === 'CLOSED' ? 'text-yellow-500' : 'text-red-500'
+            }>[{pickem.status}]</span>
+          </div>
+          <div className="space-y-4">
+            {pickem.choices.map((choice) => (
+              <div key={choice.id} className="p-4 border border-gray-500 rounded font-mono text-gray-500">
+                <div className="flex items-center">
+                  {choice.userChoices?.[0]?.user?.avatarUrl && (
+                    <img 
+                      src={choice.userChoices[0].user.avatarUrl} 
+                      alt={`${choice.userChoices[0].user.username}'s avatar`}
+                      className="w-6 h-6 rounded-full mr-2"
+                    />
+                  )}
+                  <div>
+                    <div>{choice.text}</div>
+                    {choice.description && (
+                      <div className="text-xs mt-2 opacity-75">{choice.description}</div>
+                    )}
+                    {choice.nickname && (
+                      <div className="text-xs mt-1 opacity-75">
+                        [Creator: {choice.nickname}]
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
     return (
       <div key={pickem.id} className="bg-black border border-green-500 rounded p-6 mb-4 shadow-[0_0_15px_rgba(34,197,94,0.2)]">
         {pickem.category && (
-          <div className="text-sm text-green-400 font-mono mb-2">
-            [CATEGORY]: {pickem.category}
+          <div className="text-sm text-green-400 font-mono mb-2 flex justify-between">
+            <span>[CATEGORY]: {pickem.category}</span>
+            <span>[{pickem.status}]</span>
           </div>
         )}
         
@@ -205,27 +267,58 @@ const PickemPage = () => {
         <div className="space-y-4">
           {pickem.choices.map((choice) => {
             const choiceMade = isChoiceMade(choice.id);
+            const isOwnedChoice = choice.owner?.id === user.id;
+            const shouldAutoSelect = isOwnedChoice && !choiceMade;
+
+            // Auto-select owned choice if not already selected
+            if (shouldAutoSelect) {
+              handleChoice(choice.id);
+            }
+
             return (
               <button
                 key={choice.id}
-                onClick={() => !choiceMade && handleChoice(choice.id)}
-                disabled={choiceMade}
+                onClick={() => !choiceMade && !isOwnedChoice && handleChoice(choice.id)}
+                disabled={choiceMade || (pickem.choices.some(c => c.owner?.id === user.id) && !isOwnedChoice)}
                 className={`w-full py-4 px-6 border rounded transition-all duration-200
                            flex items-center justify-between group font-mono
                            ${choiceMade 
                              ? 'bg-green-900/20 border-green-500 text-green-500'
-                             : 'bg-black border-green-500 hover:bg-green-500/10 text-green-500 hover:shadow-[0_0_10px_rgba(34,197,94,0.5)]'
+                             : isOwnedChoice
+                               ? 'bg-green-900/40 border-green-500 text-green-500'
+                               : 'bg-black border-green-500 hover:bg-green-500/10 text-green-500 hover:shadow-[0_0_10px_rgba(34,197,94,0.5)]'
                            }`}
               >
-                <span className="flex items-center">
-                  {choiceMade ? (
-                    <span className="mr-2">[✓]</span>
-                  ) : (
-                    <span className="mr-2">&gt;</span>
+                <div className="text-left flex items-center">
+                  {choice.userChoices?.[0]?.user?.avatarUrl && (
+                    <img 
+                      src={choice.userChoices[0].user.avatarUrl} 
+                      alt={`${choice.userChoices[0].user.username}'s avatar`}
+                      className="w-6 h-6 rounded-full mr-2"
+                    />
                   )}
-                  {choice.text}
-                </span>
-                {!choiceMade && (
+                  <div>
+                    <div className="flex items-center">
+                      {choiceMade ? (
+                        <span className="mr-2">[✓]</span>
+                      ) : isOwnedChoice ? (
+                        <span className="mr-2">[YOUR_PICK]</span>
+                      ) : (
+                        <span className="mr-2">&gt;</span>
+                      )}
+                      {choice.text}
+                    </div>
+                    {choice.description && (
+                      <div className="text-xs mt-1 opacity-75 ml-6">{choice.description}</div>
+                    )}
+                    {choice.nickname && (
+                      <div className="text-xs mt-1 opacity-75 ml-6">
+                        [Creator: {choice.nickname}]
+                      </div>
+                    )}
+                  </div>
+                </div>
+                {!choiceMade && !isOwnedChoice && (
                   <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                     _EXECUTE
                   </span>

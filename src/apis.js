@@ -1,10 +1,5 @@
-
 export const bulkCreatePickems = async (req, res, context) => {
   try {
-    // if (!context.user?.isAdmin) {
-    //   return res.status(403).json({ message: 'Only admins can bulk create pickems' })
-    // }
-
     const { contestId, pickems } = req.body
 
     if (!contestId) {
@@ -15,24 +10,18 @@ export const bulkCreatePickems = async (req, res, context) => {
       return res.status(400).json({ message: 'Pickems must be an array' })
     }
 
-    // Get all users with nicknames to map owners
-    const users = await context.entities.User.findMany({
-      where: {
-        nickname: {
-          not: null
-        }
-      },
-      select: {
-        id: true,
-        nickname: true
-      }
-    })
+    // Get unique categories from pickems
+    const uniqueCategories = [...new Set(pickems.map(p => p.category))]
 
-    // Create map of nickname to user ID
-    const ownerMap = {}
-    for (const user of users) {
-      ownerMap[user.nickname] = user.id
-    }
+    // Create/connect all categories upfront
+    console.log('Creating/connecting categories:', uniqueCategories)
+    await Promise.all(uniqueCategories.map(categoryName => 
+      context.entities.PickemCategory.upsert({
+        where: { name: categoryName },
+        create: { name: categoryName },
+        update: {}
+      })
+    ))
 
     const createdPickems = []
 
@@ -43,17 +32,12 @@ export const bulkCreatePickems = async (req, res, context) => {
       const createChoice = (prediction) => {
         if (!prediction) return
         
-        const ownerId = prediction.owner ? ownerMap[prediction.owner] : null
-        // Skip warning about missing owner since it's optional
-        
-        return {
+        const choice = {
           text: prediction.text,
-          ...(ownerId && {
-            owner: {
-              connect: { id: ownerId }
-            }
-          })
+          nickname: prediction.owner || null // Store the nickname directly
         }
+        
+        return choice
       }
 
       const choice1 = createChoice(pickem.prediction1)
@@ -62,14 +46,13 @@ export const bulkCreatePickems = async (req, res, context) => {
       const choice2 = createChoice(pickem.prediction2) 
       if (choice2) choices.push(choice2)
 
+      console.log(`Adding pickem with choices: ${JSON.stringify(choices)}`)
+
       // Create the pickem with its choices
       const createdPickem = await context.entities.Pickem.create({
         data: {
           category: {
-            connectOrCreate: {
-              where: { name: pickem.category },
-              create: { name: pickem.category }
-            }
+            connect: { name: pickem.category }
           },
           contest: {
             connect: { id: contestId }

@@ -4,14 +4,52 @@ export const getOpenPickems = async (args, context) => {
   if (!context.user) { throw new HttpError(401) }
   return context.entities.Pickem.findMany({
     where: { correctChoiceId: null },
-    include: { choices: true }
+    include: { 
+      choices: {
+        select: {
+          id: true,
+          text: true,
+          description: true,
+          nickname: true,
+          userChoices: {
+            select: {
+              id: true,
+              userId: true,
+              user: {
+                select: {
+                  id: true,
+                  username: true,
+                  nickname: true,
+                  avatarUrl: true
+                }
+              }
+            }
+          }
+        }
+      }
+    }
   });
 }
+
 export const getPickemChoices = async (args, context) => {
   if (!context.user) { throw new HttpError(401) }
   return context.entities.PickemChoice.findMany({
     include: {
-      pickem: true
+      pickem: true,
+      userChoices: {
+        select: {
+          id: true,
+          userId: true,
+          user: {
+            select: {
+              id: true,
+              username: true,
+              nickname: true,
+              avatarUrl: true
+            }
+          }
+        }
+      }
     }
   });
 }
@@ -27,6 +65,7 @@ export const getUserPickemChoices = async (args, context) => {
     }
   });
 }
+
 export const getUserContests = async (args, context) => {
   if (!context.user) { throw new HttpError(401) }
   return context.entities.Contest.findMany({
@@ -135,3 +174,17 @@ export const getCategories = async (args, context) => {
   if (!context.user) { throw new HttpError(401) }
   return context.entities.PickemCategory.findMany();
 }
+
+export const getLeaderboard = async (args, context) => {
+  if (!context.user) {
+    throw new Error('Unauthorized');
+  }
+
+  // Fetch users sorted by points in descending order
+  const users = await context.entities.User.findMany({
+    orderBy: { points: 'desc' },
+    select: { id: true, username: true, points: true }
+  });
+
+  return users;
+};

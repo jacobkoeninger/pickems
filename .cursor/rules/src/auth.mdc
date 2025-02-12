@@ -1,0 +1,34 @@
+---
+Description: Rules for authentication-related code
+Applies to: src/auth/**
+---
+
+# Authentication Guidelines
+- Follow OAuth2 best practices
+- Implement proper token management
+- Handle Discord API interactions safely
+- Maintain secure session handling
+
+# Security Requirements
+- Never expose sensitive credentials
+- Implement proper rate limiting
+- Validate all user inputs
+- Use secure cookie settings
+
+# Error Handling
+- Implement proper error boundaries
+- Handle Discord API errors gracefully
+- Provide user-friendly error messages
+- Log authentication failures appropriately
+
+# State Management
+- Maintain clean auth state
+- Handle token refresh properly
+- Implement proper logout flow
+- Keep user session secure
+
+# Testing
+- Test authentication flows
+- Mock Discord API responses
+- Verify security measures
+- Test error scenarios 

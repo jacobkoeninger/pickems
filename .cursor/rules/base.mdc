@@ -1,0 +1,74 @@
+---
+Description: Base rules for the Pickems project
+---
+
+You are a Wasp/React/Node.js expert focused on building a pick'em contest platform.
+
+# Project Context
+
+## Pick'em Contest System
+- Users are presented with a list of predictions, each offering two options.
+- For every prediction, users choose between option 1 or option 2.
+- When a prediction closes, every user who chose correctly earns points equal to the number of users who voted for the opposing option.
+- The current scoring ratio is fixed at 1 point per voter on the other side, though this may be adjusted in the future.
+- There will always be two choices for each prediction.
+- In predictions created by an owner, that owner is locked into making the first choice (i.e., the option they initially set).
+
+## Core Game Mechanics
+
+### Scoring Rules
+- Points distribution: Upon closure of a prediction, each correct voter earns points equal to the number of users who voted for the opposing option.
+- If one option receives no votes, no points are awarded for that prediction.
+
+### Timing and Cutoff
+- The default cutoff for locking predictions aligns with the contest's deadline.
+- Admins have the ability to update the cutoff time at any point.
+
+### Leaderboards and Tracking
+- Admins can update leaderboards at any time.
+- Leaderboards should track:
+  - Total points per contest
+  - Breakdown of votes per prediction
+  - User performance history (e.g., win/loss records, high-risk/high-reward wins)
+
+## User Management
+- Users authenticate via Discord OAuth.
+- Users can set and manage multiple nicknames.
+- User profiles track contest history and statistics.
+- User roles include admin, moderator, and participant.
+
+## Technical Architecture
+- Built with Wasp framework for full-stack integration.
+- Uses Prisma for database operations.
+- Discord authentication for user management.
+- Provides real-time updates for contest status and scores.
+
+# Core Principles
+- Follow Wasp framework best practices.
+- Maintain TypeScript type safety throughout.
+- Ensure responsive design with TailwindCSS.
+- Prioritize security in all implementations.
+
+# Code Standards
+- Use TypeScript for all new code.
+- Follow functional React patterns.
+- Implement proper error handling.
+- Write comprehensive tests.
+- Keep components focused and single-responsibility.
+
+# Documentation
+- Maintain inline documentation
+- Update relevant docs in /docs directory
+- Include JSDoc comments for functions
+
+Remember to consider:
+- Discord OAuth integration implications.
+- Database schema impacts.
+- Security best practices.
+- User experience.
+- Contest deadline handling.
+- Score calculation accuracy (critical for the betting system).
+- Real-time update requirements.
+- Edge cases in betting mechanics.
+- Clear presentation of betting odds/sides.
+- Historical tracking of bets and outcomes 

@@ -1,0 +1,34 @@
+---
+Description: Rules for React components in the Pickems project
+Applies to: src/components/**
+---
+
+# Component Guidelines
+- Use functional components with hooks
+- Implement proper TypeScript interfaces
+- Follow component composition patterns
+- Use TailwindCSS for styling
+
+# Component Structure
+- Props should be typed with TypeScript interfaces
+- Include prop documentation with JSDoc
+- Implement error boundaries where needed
+- Use proper React.memo() for optimization
+
+# State Management
+- Prefer hooks for local state
+- Use context for shared state
+- Implement proper loading states
+- Handle error states gracefully
+
+# Accessibility
+- Include proper ARIA attributes
+- Ensure keyboard navigation
+- Maintain proper contrast ratios
+- Support screen readers
+
+# Performance
+- Optimize re-renders
+- Lazy load when appropriate
+- Implement proper memoization
+- Keep bundle size in mind 

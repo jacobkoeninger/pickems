@@ -11,7 +11,7 @@ app Pickems {
     methods: {
       discord: {
         configFn: import { getConfig } from "@src/auth/discord.js",
-        userSignupFields: import { userSignupFields } from "@src/auth/discord.js"
+        userSignupFields: import { userSignupFields } from "@src/auth/discord.js",
       }
     },
     onAuthFailedRedirectTo: "/login",
