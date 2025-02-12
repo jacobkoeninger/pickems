@@ -19,15 +19,23 @@ docs/
 *.md
 !README.md
 
-# Ignore all dotenv files by default to prevent accidentally committing any secrets
-# To include specific dotenv files, use the `!` operator
-!.env.example
-!.env.*.example
+# Cursor
+.cursor/
+.cursorrules
+*.mdc
 
 # Database
 *.sqlite
 *.sqlite3
 *.db
+migrations/
+prisma/migrations/
+*.sql
+
+# Ignore all dotenv files by default to prevent accidentally committing any secrets
+# To include specific dotenv files, use the `!` operator
+!.env.example
+!.env.*.example
 
 # Build output
 dist/
