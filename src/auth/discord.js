@@ -1,10 +1,16 @@
 import { nicknameMap } from './nicknames.js'
 
-export const getConfig = () => {
-    if (!process.env.DISCORD_CLIENT_ID || !process.env.DISCORD_CLIENT_SECRET) {
-        console.error("Error: Missing Discord OAuth environment variables. Ensure DISCORD_CLIENT_ID and DISCORD_CLIENT_SECRET are set in your .env file.");
-        throw new Error('Missing Discord OAuth env variables');
+const validateEnvVars = () => {
+    const required = ['DISCORD_CLIENT_ID', 'DISCORD_CLIENT_SECRET', 'DATABASE_URL'];
+    const missing = required.filter(key => !process.env[key]);
+    
+    if (missing.length > 0) {
+        throw new Error(`Missing required environment variables: ${missing.join(', ')}`);
     }
+}
+
+export const getConfig = () => {
+    validateEnvVars();
 
     return {
         clientID: process.env.DISCORD_CLIENT_ID,
@@ -21,5 +27,12 @@ export const userSignupFields = {
         `https://cdn.discordapp.com/avatars/${data.profile.id}/${data.profile.avatar}.png` : 
         null,
     nickname: (data) => nicknameMap[data.profile.global_name || data.profile.username] || null,
-    isAdmin: () => false
+    isAdmin: (data) => {
+        // Allow configuring initial admin user by Discord username
+        const adminUsername = process.env.INITIAL_ADMIN_USERNAME;
+        if (adminUsername && data.profile.username === adminUsername) {
+            return true;
+        }
+        return false;
+    }
 }

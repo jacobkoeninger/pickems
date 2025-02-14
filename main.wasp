@@ -1,6 +1,6 @@
 app Pickems {
   wasp: {
-    version: "^0.15.0"
+    version: "^0.16.0"
   },
   title: "Pickems",
   client: {
@@ -16,11 +16,6 @@ app Pickems {
     },
     onAuthFailedRedirectTo: "/login",
     onAuthSucceededRedirectTo: "/"
-  },
-  db: {
-    seeds: [
-      import { devSeedAdmin } from "@src/dbSeeds.js",
-    ]
   }
 }
 
@@ -81,7 +76,7 @@ api bulkCreatePickemsApi {
   fn: import { bulkCreatePickems } from "@src/apis.js",
   httpRoute: (POST, "/bulk-create-pickems"),
   entities: [User, Contest, Pickem, PickemChoice, PickemCategory],
-  auth: false
+  auth: true
 }
 
 query getOpenPickems {

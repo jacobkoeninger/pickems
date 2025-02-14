@@ -284,17 +284,27 @@ export const bulkCreatePickems = async (data, context) => {
     throw new Error('Invalid pickems format');
   }
 
+  // Add size limits for production safety
+  const MAX_BULK_SIZE = process.env.MAX_BULK_SIZE ? parseInt(process.env.MAX_BULK_SIZE) : 100;
+  if (data.pickems.length > MAX_BULK_SIZE) {
+    throw new Error(`Bulk upload limited to ${MAX_BULK_SIZE} items at a time`);
+  }
+
   if (!data.contestId) {
     throw new Error('Contest ID is required');
   }
 
-  // Verify contest exists
+  // Verify contest exists and is active
   const contest = await context.entities.Contest.findUnique({
     where: { id: parseInt(data.contestId) }
   });
 
   if (!contest) {
     throw new Error(`Contest with ID ${data.contestId} not found`);
+  }
+
+  if (!contest.isActive) {
+    throw new Error('Cannot add pickems to inactive contest');
   }
 
   const createdPickems = [];
