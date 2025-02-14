@@ -27,16 +27,6 @@ This document outlines the roadmap for our current development cycle to improve 
 
 ## Initial Task List
 - [x] Conduct a detailed codebase review. *(Completed: Reviewed src/, src/components, src/auth, and parsed_pickems.json)*
-- [ ] Identify key areas needing improvement or additional work:
-  - Authentication and Discord integration
-  - Contest and prediction logic
-  - Leaderboard functionality and real-time updates
-  - Testing and quality assurance
-  - Documentation enhancements
-- [ ] Break down each area into specific tasks.
-- [ ] Prioritize tasks and assign tentative deadlines.
-- [ ] Schedule periodic check-ins to review and adjust this roadmap.
-
 ## Milestones
 - **Milestone 1:** Complete the codebase review and document all areas for improvement. *(Achieved)*
 - **Milestone 2:** Define and prioritize all tasks based on the review.

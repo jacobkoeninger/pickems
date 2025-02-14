@@ -87,6 +87,13 @@ export const Layout = () => {
                     </Link>
                   )}
                   <Link
+                    to="/"
+                    className="block px-4 py-2 text-sm font-mono text-green-500 hover:bg-green-500 hover:text-black"
+                    onClick={() => setDropdownOpen(false)}
+                  >
+                    &gt; Prototype_v2
+                  </Link>
+                  <Link
                     to="/settings"
                     className="block px-4 py-2 text-sm font-mono text-green-500 hover:bg-green-500 hover:text-black"
                     onClick={() => setDropdownOpen(false)}
