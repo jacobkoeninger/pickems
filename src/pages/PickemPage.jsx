@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useQuery, useAction } from 'wasp/client/operations';
-import { getOpenPickems, createUserPickemChoice, getUserPickemChoices, getContests } from 'wasp/client/operations';
+import { getOpenPickems, createUserPickemChoice, getUserPickemChoices, getContests, getLeaderboard } from 'wasp/client/operations';
 import { useAuth } from 'wasp/client/auth';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -21,6 +21,7 @@ const PickemPage = () => {
   const { data: pickems = [], isLoading: pickemsLoading } = useQuery(getOpenPickems);
   const { data: contests = [] } = useQuery(getContests);
   const { data: userChoices = [] } = useQuery(getUserPickemChoices);
+  const { data: leaderboardData = [], isLoading: leaderboardLoading } = useQuery(getLeaderboard);
   const createUserPickemChoiceFn = useAction(createUserPickemChoice);
 
   const [activeTab, setActiveTab] = useState('contests');
@@ -533,9 +534,104 @@ const PickemPage = () => {
             )}
 
             {activeTab === 'leaderboard' && (
-              <div className="border border-green-500/30 rounded-lg p-6">
-                <h2 className="text-xl font-mono mb-6">&gt; GLOBAL_RANKINGS:</h2>
-                {/* Add content for leaderboard tab */}
+              <div className="space-y-6">
+                {/* Leaderboard Header */}
+                <div className="border border-green-500/30 rounded-lg p-6 bg-black">
+                  <h2 className="text-xl font-mono mb-6">&gt; GLOBAL_RANKINGS</h2>
+                  
+                  {leaderboardLoading ? (
+                    <div className="flex items-center justify-center py-8">
+                      <div className="flex items-center space-x-4 font-mono text-xl text-green-500">
+                        <span className="animate-pulse">[</span>
+                        <span>LOADING_RANKINGS</span>
+                        <span className="animate-pulse">]</span>
+                      </div>
+                    </div>
+                  ) : (
+                    /* Leaderboard Table */
+                    <div className="overflow-x-auto">
+                      <table className="w-full">
+                        <thead>
+                          <tr className="border-b border-green-500/30">
+                            <th className="px-4 py-2 text-left text-sm font-mono text-green-500/70">RANK</th>
+                            <th className="px-4 py-2 text-left text-sm font-mono text-green-500/70">AGENT</th>
+                            <th className="px-4 py-2 text-left text-sm font-mono text-green-500/70">POINTS</th>
+                            <th className="px-4 py-2 text-left text-sm font-mono text-green-500/70">SUCCESS_RATE</th>
+                            <th className="px-4 py-2 text-left text-sm font-mono text-green-500/70">CORRECT_PICKS</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-green-500/10">
+                          {leaderboardData?.map((userData, index) => {
+                            const isCurrentUser = userData.id === user?.id;
+                            const rank = index + 1;
+                            const successRate = userData.totalPicks > 0 
+                              ? Math.round((userData.correctPicks / userData.totalPicks) * 100)
+                              : 0;
+                            
+                            return (
+                              <tr 
+                                key={userData.id}
+                                className={`group transition-all duration-200 
+                                  ${isCurrentUser ? 'bg-green-500/5' : 'hover:bg-green-500/5'}`}
+                              >
+                                <td className="px-4 py-3 font-mono">
+                                  <div className="flex items-center space-x-2">
+                                    {rank <= 3 && (
+                                      <span className="text-lg">
+                                        {rank === 1 ? '👑' : rank === 2 ? '🥈' : '🥉'}
+                                      </span>
+                                    )}
+                                    <span className={`${isCurrentUser ? 'text-green-500' : 'text-green-500/70'}`}>
+                                      #{String(rank).padStart(2, '0')}
+                                    </span>
+                                  </div>
+                                </td>
+                                <td className="px-4 py-3">
+                                  <div className="flex items-center space-x-3">
+                                    {userData.avatarUrl && (
+                                      <img 
+                                        src={userData.avatarUrl} 
+                                        alt=""
+                                        className="w-8 h-8 rounded-sm border border-green-500/30"
+                                      />
+                                    )}
+                                    <div>
+                                      <div className={`font-mono ${isCurrentUser ? 'text-green-500' : 'text-green-500/90'}`}>
+                                        {userData.username}
+                                      </div>
+                                      {userData.nickname && (
+                                        <div className="text-sm font-mono text-green-500/50">
+                                          [{userData.nickname}]
+                                        </div>
+                                      )}
+                                    </div>
+                                  </div>
+                                </td>
+                                <td className="px-4 py-3 font-mono">
+                                  <span className={`${isCurrentUser ? 'text-green-500' : 'text-green-500/90'}`}>
+                                    {userData.points}
+                                  </span>
+                                  <span className="text-green-500/50"> pts</span>
+                                </td>
+                                <td className="px-4 py-3 font-mono">
+                                  <span className={`${isCurrentUser ? 'text-green-500' : 'text-green-500/90'}`}>
+                                    {successRate}%
+                                  </span>
+                                </td>
+                                <td className="px-4 py-3 font-mono">
+                                  <span className={`${isCurrentUser ? 'text-green-500' : 'text-green-500/90'}`}>
+                                    {userData.correctPicks}
+                                  </span>
+                                  <span className="text-green-500/50"> / {userData.totalPicks}</span>
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
               </div>
             )}
           </motion.div>

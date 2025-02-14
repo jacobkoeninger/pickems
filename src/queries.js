@@ -178,18 +178,55 @@ export const getCategories = async (args, context) => {
 }
 
 export const getLeaderboard = async (args, context) => {
-  if (!context.user) {
-    throw new Error('Unauthorized');
-  }
-
-  // Fetch users sorted by points in descending order
   const users = await context.entities.User.findMany({
-    orderBy: { points: 'desc' },
-    select: { id: true, username: true, points: true }
+    where: {
+      points: {
+        gt: 0
+      }
+    },
+    orderBy: {
+      points: 'desc'
+    },
+    take: 100,
+    select: {
+      id: true,
+      username: true,
+      nickname: true,
+      points: true,
+      avatarUrl: true,
+      userPickemChoices: {
+        include: {
+          pickemChoice: {
+            include: {
+              pickem: {
+                select: {
+                  correctChoiceId: true
+                }
+              }
+            }
+          }
+        }
+      }
+    }
   });
 
-  return users;
-};
+  return users.map(user => {
+    const totalPicks = user.userPickemChoices.length;
+    const correctPicks = user.userPickemChoices.filter(pick => 
+      pick.pickemChoice.pickem.correctChoiceId === pick.pickemChoice.id
+    ).length;
+    
+    return {
+      id: user.id,
+      username: user.username,
+      nickname: user.nickname,
+      points: user.points,
+      avatarUrl: user.avatarUrl,
+      totalPicks,
+      correctPicks
+    };
+  });
+}
 
 export const getPickemById = async ({ pickemId }, context) => {
   if (!context.user) { throw new HttpError(401) }

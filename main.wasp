@@ -134,6 +134,11 @@ query getPickemById {
   entities: [Pickem, PickemChoice, PickemCategory]
 }
 
+query getLeaderboard {
+  fn: import { getLeaderboard } from "@src/queries.js",
+  entities: [User, UserPickemChoice]
+}
+
 route PickemPageRoute { path: "/", to: PickemPage }
 page PickemPage {
   component: import PickemPage from "@src/pages/PickemPage.jsx",
