@@ -16,6 +16,68 @@ const Tab = ({ active, children, onClick }) => (
   </button>
 );
 
+const Leaderboard = ({ data, currentUser }) => {
+  if (!data || data.length === 0) {
+    return (
+      <div className="text-center py-8 text-gray-500">
+        No leaderboard data available yet
+      </div>
+    );
+  }
+
+  return (
+    <div className="overflow-x-auto">
+      <table className="min-w-full divide-y divide-gray-200">
+        <thead className="bg-gray-50">
+          <tr>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rank</th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Agent</th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Points</th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Success Rate</th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Picks</th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Last Pick</th>
+          </tr>
+        </thead>
+        <tbody className="bg-white divide-y divide-gray-200">
+          {data.map((user, index) => {
+            const isCurrentUser = user.id === currentUser?.id;
+            const rankIcons = ['🥇', '🥈', '🥉'];
+            const rank = index + 1;
+
+            return (
+              <tr key={user.id} className={isCurrentUser ? 'bg-green-50' : ''}>
+                <td className="px-6 py-4 whitespace-nowrap text-sm">
+                  {rank <= 3 ? rankIcons[rank - 1] : rank}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <div className="flex items-center">
+                    <div className="text-sm font-medium text-gray-900">
+                      {user.nickname || user.username}
+                      {isCurrentUser && <span className="ml-2 text-xs text-green-600">(You)</span>}
+                    </div>
+                  </div>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  {user.points}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  {(user.successRate * 100).toFixed(1)}%
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  {user.correctPicks}/{user.totalPicks}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  {new Date(user.lastPickAt).toLocaleDateString()}
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+  );
+};
+
 const PickemPage = () => {
   const { data: user } = useAuth();
   const { data: pickems = [], isLoading: pickemsLoading } = useQuery(getOpenPickems);
@@ -69,6 +131,11 @@ const PickemPage = () => {
   const renderPickem = (pickem) => {
     if (!pickem) return null;
     
+    // Get user's existing choice for this pickem
+    const userChoice = userChoices.find(uc => uc.pickemId === pickem.id);
+    // Check if user made a prediction in this pickem
+    const userPrediction = pickem.choices.find(choice => choice.nickname === user?.nickname);
+    
     return (
       <>
         {/* Category Badge */}
@@ -87,81 +154,57 @@ const PickemPage = () => {
           </div>
         </div>
 
-        {/* Title */}
-        <div className="mb-6 font-mono">
-          <div className="text-green-500 text-base flex items-start">
-            <span className="mr-2 mt-1">&gt;</span>
-            <span className="leading-snug">
-              {pickem.title}
-            </span>
-          </div>
-        </div>
-
         {/* Choices */}
         <div className="space-y-4 flex-1">
           {pickem.choices.map((choice, index) => {
-            const choiceMade = isChoiceMade(choice.id);
-            const isOwnedChoice = choice.nickname === user?.nickname;
-            const userOwnsAChoice = pickem.choices.some(c => c.nickname === user?.nickname);
-            const isMainChoice = index === 0;
+            const isUserPrediction = choice.nickname ? choice.nickname === user?.nickname : false;
+            const isChosen = userChoice?.pickemChoiceId === choice.id;
+            const contest = contests.find(c => c.id === pickem.contestId);
+            const canChoose = !pickem.correctChoiceId && (!contest?.deadline || new Date(contest.deadline) > new Date());
 
             return (
               <button
                 key={choice.id}
-                onClick={() => !choiceMade && !userOwnsAChoice && handleChoice(choice.id)}
-                disabled={choiceMade || (userOwnsAChoice && !isOwnedChoice)}
+                onClick={() => canChoose && handleChoice(choice.id)}
+                disabled={!canChoose}
                 className={`w-full p-5 border rounded-sm transition-all duration-200 relative group/choice
-                         ${choiceMade 
+                         ${isChosen 
                            ? 'bg-green-900/20 border-green-500 text-green-500 shadow-[0_0_10px_rgba(34,197,94,0.2)]'
-                           : isOwnedChoice
+                           : isUserPrediction
                              ? 'bg-green-900/40 border-green-500 text-green-500 shadow-[0_0_15px_rgba(34,197,94,0.3)]'
-                             : userOwnsAChoice
+                             : !canChoose
                                ? 'bg-black border-gray-500/30 text-gray-500/70 cursor-not-allowed'
-                               : isMainChoice
-                                 ? 'bg-black border-green-500/30 hover:border-green-500 hover:bg-green-500/5 hover:shadow-[0_0_10px_rgba(34,197,94,0.1)]'
-                                 : 'bg-black/50 border-green-500/20 hover:border-green-500/30 hover:bg-green-500/5'
+                               : 'bg-black border-green-500/30 hover:border-green-500 hover:bg-green-500/5'
                          }`}
               >
                 <div className="flex items-start justify-between">
                   <div className="flex items-start space-x-3 text-left w-full">
-                    {choice.userChoices?.[0]?.user?.avatarUrl && (
-                      <img
-                        src={choice.userChoices[0].user.avatarUrl}
-                        alt="User avatar"
-                        className="w-6 h-6 rounded-sm mt-1 border border-green-500/30 flex-shrink-0"
-                      />
-                    )}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center space-x-2 mb-1">
-                        {choiceMade && (
-                          <span className="text-green-500 font-bold tracking-wider">[✓]</span>
+                        {isUserPrediction && (
+                          <span className="text-green-500 bg-green-500/10 px-2 py-0.5 rounded-sm text-xs tracking-wider">[YOUR_PREDICTION]</span>
                         )}
-                        {isOwnedChoice && (
-                          <span className="text-green-500 bg-green-500/10 px-2 py-0.5 rounded-sm text-xs tracking-wider">[YOUR_PICK]</span>
+                        {isChosen && (
+                          <span className="text-green-500 bg-green-500/10 px-2 py-0.5 rounded-sm text-xs tracking-wider">[YOUR_CHOICE]</span>
                         )}
                       </div>
                       <div className="flex items-start space-x-2">
                         <span className="text-green-500/50 mt-1">&gt;</span>
-                        <span className={`font-mono leading-relaxed break-words ${isMainChoice ? 'text-green-500' : 'text-green-500/70'}`}>
+                        <span className="font-mono leading-relaxed break-words text-green-500">
                           {choice.text}
                         </span>
                       </div>
-                      {choice.description && (
-                        <div className="mt-2 text-sm text-green-500/70 font-mono pl-4 break-words">
-                          {choice.description}
-                        </div>
-                      )}
                       {choice.nickname && (
-                        <div className="mt-3 text-xs border-t border-green-500/10 pt-2 font-mono flex items-center">
+                        <div className="mt-2 text-xs border-t border-green-500/10 pt-2 font-mono flex items-center">
                           <span className="text-green-500/30">&gt; AGENT:</span>
                           <span className="ml-2 text-green-500/70">{choice.nickname}</span>
                         </div>
                       )}
                     </div>
                   </div>
-                  {!choiceMade && !userOwnsAChoice && (
+                  {canChoose && !isChosen && (
                     <div className="text-green-500/50 text-xs opacity-0 group-hover/choice:opacity-100 transition-opacity duration-200 absolute right-4 top-1/2 -translate-y-1/2 flex items-center">
-                      <span className="mr-2">{isMainChoice ? 'EXECUTE' : 'COUNTER'}</span>
+                      <span className="mr-2">SELECT</span>
                       <span className="text-lg leading-none">&gt;</span>
                     </div>
                   )}
@@ -548,88 +591,7 @@ const PickemPage = () => {
                       </div>
                     </div>
                   ) : (
-                    /* Leaderboard Table */
-                    <div className="overflow-x-auto">
-                      <table className="w-full">
-                        <thead>
-                          <tr className="border-b border-green-500/30">
-                            <th className="px-4 py-2 text-left text-sm font-mono text-green-500/70">RANK</th>
-                            <th className="px-4 py-2 text-left text-sm font-mono text-green-500/70">AGENT</th>
-                            <th className="px-4 py-2 text-left text-sm font-mono text-green-500/70">POINTS</th>
-                            <th className="px-4 py-2 text-left text-sm font-mono text-green-500/70">SUCCESS_RATE</th>
-                            <th className="px-4 py-2 text-left text-sm font-mono text-green-500/70">CORRECT_PICKS</th>
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y divide-green-500/10">
-                          {leaderboardData?.map((userData, index) => {
-                            const isCurrentUser = userData.id === user?.id;
-                            const rank = index + 1;
-                            const successRate = userData.totalPicks > 0 
-                              ? Math.round((userData.correctPicks / userData.totalPicks) * 100)
-                              : 0;
-                            
-                            return (
-                              <tr 
-                                key={userData.id}
-                                className={`group transition-all duration-200 
-                                  ${isCurrentUser ? 'bg-green-500/5' : 'hover:bg-green-500/5'}`}
-                              >
-                                <td className="px-4 py-3 font-mono">
-                                  <div className="flex items-center space-x-2">
-                                    {rank <= 3 && (
-                                      <span className="text-lg">
-                                        {rank === 1 ? '👑' : rank === 2 ? '🥈' : '🥉'}
-                                      </span>
-                                    )}
-                                    <span className={`${isCurrentUser ? 'text-green-500' : 'text-green-500/70'}`}>
-                                      #{String(rank).padStart(2, '0')}
-                                    </span>
-                                  </div>
-                                </td>
-                                <td className="px-4 py-3">
-                                  <div className="flex items-center space-x-3">
-                                    {userData.avatarUrl && (
-                                      <img 
-                                        src={userData.avatarUrl} 
-                                        alt=""
-                                        className="w-8 h-8 rounded-sm border border-green-500/30"
-                                      />
-                                    )}
-                                    <div>
-                                      <div className={`font-mono ${isCurrentUser ? 'text-green-500' : 'text-green-500/90'}`}>
-                                        {userData.username}
-                                      </div>
-                                      {userData.nickname && (
-                                        <div className="text-sm font-mono text-green-500/50">
-                                          [{userData.nickname}]
-                                        </div>
-                                      )}
-                                    </div>
-                                  </div>
-                                </td>
-                                <td className="px-4 py-3 font-mono">
-                                  <span className={`${isCurrentUser ? 'text-green-500' : 'text-green-500/90'}`}>
-                                    {userData.points}
-                                  </span>
-                                  <span className="text-green-500/50"> pts</span>
-                                </td>
-                                <td className="px-4 py-3 font-mono">
-                                  <span className={`${isCurrentUser ? 'text-green-500' : 'text-green-500/90'}`}>
-                                    {successRate}%
-                                  </span>
-                                </td>
-                                <td className="px-4 py-3 font-mono">
-                                  <span className={`${isCurrentUser ? 'text-green-500' : 'text-green-500/90'}`}>
-                                    {userData.correctPicks}
-                                  </span>
-                                  <span className="text-green-500/50"> / {userData.totalPicks}</span>
-                                </td>
-                              </tr>
-                            );
-                          })}
-                        </tbody>
-                      </table>
-                    </div>
+                    <Leaderboard data={leaderboardData} currentUser={user} />
                   )}
                 </div>
               </div>

@@ -77,6 +77,16 @@ action updatePickem {
   entities: [Pickem, PickemChoice, User]
 }
 
+action createPickemWithPredefinedChoices {
+  fn: import { createPickemWithPredefinedChoices } from "@src/actions.js",
+  entities: [User, Pickem, PickemChoice, PickemCategory]
+}
+
+action automateAllUserChoices {
+  fn: import { automateAllUserChoices } from "@src/actions.js",
+  entities: [User, Pickem, PickemChoice, UserPickemChoice]
+}
+
 api bulkCreatePickemsApi {
   fn: import { bulkCreatePickems } from "@src/apis.js",
   httpRoute: (POST, "/bulk-create-pickems"),

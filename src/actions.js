@@ -195,6 +195,38 @@ export const updatePickemChoiceOwner = async ({ pickemChoiceId, newOwnerId, newN
   return updatedChoice
 }
 
+// Add this helper function
+const updateUserStats = async (userId, context) => {
+  const userStats = await context.entities.UserPickemChoice.findMany({
+    where: {
+      userId,
+    },
+    include: {
+      pickemChoice: {
+        include: {
+          pickem: true
+        }
+      }
+    }
+  });
+
+  const totalPicks = userStats.length;
+  const correctPicks = userStats.filter(pick => 
+    pick.pickemChoice.pickem.correctChoiceId === pick.pickemChoice.id
+  ).length;
+  const successRate = totalPicks > 0 ? (correctPicks / totalPicks) : 0;
+
+  await context.entities.User.update({
+    where: { id: userId },
+    data: {
+      totalPicks,
+      correctPicks,
+      successRate,
+      lastPickAt: new Date()
+    }
+  });
+};
+
 export const createUserPickemChoice = async ({ userId, pickemChoiceId }, context) => {
   if (!context.user) { throw new HttpError(401) }
   if (context.user.id !== userId) { throw new HttpError(403) }
@@ -204,17 +236,45 @@ export const createUserPickemChoice = async ({ userId, pickemChoiceId }, context
     include: { 
       pickem: {
         include: {
-          contest: true
+          contest: true,
+          choices: true
         }
       }
     }
-  })
+  });
+
   if (!pickemChoice) { throw new HttpError(404, 'Choice not found') }
   if (pickemChoice.pickem.correctChoiceId) { throw new HttpError(400, 'Pickem is already closed') }
 
   // Check if contest deadline has passed
   if (pickemChoice.pickem.contest.deadline < new Date()) {
     throw new HttpError(400, 'Contest deadline has passed')
+  }
+
+  // Check if user already has a choice for this pickem
+  const existingChoice = await context.entities.UserPickemChoice.findUnique({
+    where: {
+      userId_pickemId: {
+        userId,
+        pickemId: pickemChoice.pickem.id
+      }
+    }
+  });
+
+  if (existingChoice) {
+    throw new HttpError(400, 'User already has a choice for this pickem')
+  }
+
+  // If the user has a nickname, check if they made a prediction
+  if (context.user.nickname) {
+    const userPrediction = pickemChoice.pickem.choices.find(choice => 
+      choice.nickname === context.user.nickname
+    );
+
+    // If user made a prediction but is trying to choose a different option
+    if (userPrediction && userPrediction.id !== pickemChoiceId) {
+      throw new HttpError(400, 'You must choose your own prediction')
+    }
   }
 
   const userPickemChoice = await context.entities.UserPickemChoice.create({
@@ -229,60 +289,162 @@ export const createUserPickemChoice = async ({ userId, pickemChoiceId }, context
         connect: { id: pickemChoice.pickem.id }
       }
     }
-  })
-  return userPickemChoice
-}
+  });
+
+  // Update user stats after creating the choice
+  await updateUserStats(userId, context);
+
+  // Return the updated user stats along with the choice
+  const updatedUser = await context.entities.User.findUnique({
+    where: { id: userId },
+    select: {
+      points: true,
+      totalPicks: true,
+      correctPicks: true,
+      successRate: true,
+      lastPickAt: true
+    }
+  });
+
+  return {
+    userPickemChoice,
+    userStats: updatedUser
+  };
+};
 
 export const closePickem = async ({ pickemId, correctChoiceId }, context) => {
-  if (!context.user) { throw new HttpError(403); }
+  if (!context.user) { throw new HttpError(401) }
 
   const pickem = await context.entities.Pickem.findUnique({
     where: { id: pickemId },
-    include: { choices: true }
-  });
-  if (!pickem) { throw new HttpError(404, 'Pickem not found'); }
-
-  if (pickem.correctChoiceId) { throw new HttpError(400, 'Pickem is already closed'); }
-
-  const correctChoice = pickem.choices.find(choice => choice.id === correctChoiceId);
-  if (!correctChoice) { throw new HttpError(400, 'Invalid correct choice'); }
-
-  // Get all user choices for this pickem
-  const incorrectUserChoices = await context.entities.UserPickemChoice.findMany({
-    where: {
-      pickemId: pickemId,
-      pickemChoiceId: {
-        not: correctChoiceId
+    include: {
+      contest: true,
+      choices: {
+        include: {
+          userChoices: {
+            include: {
+              user: true
+            }
+          }
+        }
       }
     }
   });
 
-  const correctUserChoices = await context.entities.UserPickemChoice.findMany({
-    where: {
-      pickemId: pickemId,
-      pickemChoiceId: correctChoiceId
-    }
-  });
+  if (!pickem) { throw new HttpError(404, 'Pickem not found') }
+  if (pickem.correctChoiceId) { throw new HttpError(400, 'Pickem is already closed') }
+  if (!pickem.contest.isAdmin(context.user.id)) { throw new HttpError(403) }
 
-  const pointsToDistribute = incorrectUserChoices.length;
-  console.log(`Scoring logic: Calculated pointsToDistribute as ${pointsToDistribute} based on ${incorrectUserChoices.length} incorrect choices.`);
+  // Verify correctChoiceId is valid
+  const correctChoice = pickem.choices.find(choice => choice.id === correctChoiceId);
+  if (!correctChoice) { throw new HttpError(400, 'Invalid correct choice') }
 
-  // Award points to users who chose correctly
-  for (const userChoice of correctUserChoices) {
-    await context.entities.User.update({
-      where: { id: userChoice.userId },
-      data: { points: { increment: pointsToDistribute } }
-    });
-  }
-
-  // Mark the pickem as closed with the correct choice
+  // Update pickem with correct choice
   await context.entities.Pickem.update({
     where: { id: pickemId },
-    data: { 
-      correctChoiceId: correctChoiceId,
-      status: 'CLOSED'
+    data: { correctChoiceId }
+  });
+
+  // Process all user choices and update points
+  const affectedUsers = new Set();
+  
+  for (const choice of pickem.choices) {
+    for (const userChoice of choice.userChoices) {
+      if (!userChoice.user) continue;
+      
+      affectedUsers.add(userChoice.user.id);
+      
+      if (choice.id === correctChoiceId) {
+        await context.entities.User.update({
+          where: { id: userChoice.user.id },
+          data: {
+            points: { increment: 1 }
+          }
+        });
+      }
+    }
+  }
+
+  // Update stats for all affected users
+  const updatedStats = [];
+  for (const userId of affectedUsers) {
+    const stats = await updateUserStats(userId, context);
+    updatedStats.push(stats);
+  }
+
+  return {
+    pickem,
+    updatedUserStats: updatedStats
+  };
+};
+
+// Helper function to automate user choices based on nicknames
+const automateUserChoices = async (context) => {
+  // Find all PickemChoices with nicknames that don't have corresponding UserPickemChoices
+  const choices = await context.entities.PickemChoice.findMany({
+    where: {
+      nickname: { not: null }
+    },
+    include: {
+      pickem: true
     }
   });
+
+  let automatedCount = 0;
+  
+  // Group choices by nickname for efficiency
+  const choicesByNickname = choices.reduce((acc, choice) => {
+    if (!choice.nickname) return acc;
+    if (!acc[choice.nickname]) acc[choice.nickname] = [];
+    acc[choice.nickname].push(choice);
+    return acc;
+  }, {});
+
+  // For each nickname, find the user and create their choices
+  for (const [nickname, nicknameChoices] of Object.entries(choicesByNickname)) {
+    const user = await context.entities.User.findFirst({
+      where: { nickname }
+    });
+
+    if (user) {
+      for (const choice of nicknameChoices) {
+        // Check if UserPickemChoice already exists
+        const existingChoice = await context.entities.UserPickemChoice.findUnique({
+          where: {
+            userId_pickemId: {
+              userId: user.id,
+              pickemId: choice.pickem.id
+            }
+          }
+        });
+
+        if (!existingChoice) {
+          await context.entities.UserPickemChoice.create({
+            data: {
+              userId: user.id,
+              pickemChoiceId: choice.id,
+              pickemId: choice.pickem.id
+            }
+          });
+          automatedCount++;
+        }
+      }
+    }
+  }
+
+  return automatedCount;
+};
+
+export const automateAllUserChoices = async (args, context) => {
+  if (!context.user?.isAdmin) { throw new HttpError(403) }
+  
+  const automatedCount = await automateUserChoices(context);
+  
+  return {
+    success: true,
+    automatedCount,
+    message: `Successfully automated ${automatedCount} user choices`
+  };
 };
 
 export const bulkCreatePickems = async (data, context) => {
@@ -405,7 +567,14 @@ export const bulkCreatePickems = async (data, context) => {
     }
   }
 
-  return createdPickems;
+  // After creating all pickems, automate user choices
+  const automatedCount = await automateUserChoices(context);
+  console.log(`Automated ${automatedCount} user choices after bulk upload`);
+
+  return {
+    createdPickems,
+    automatedCount
+  };
 };
 
 export const updatePickem = async (args, context) => {
@@ -447,4 +616,63 @@ export const updatePickem = async (args, context) => {
     success: true,
     message: 'Pickem updated successfully'
   }
+}
+
+export const createPickemWithPredefinedChoices = async ({ choices, categoryId, categoryName, contestId }, context) => {
+  if (!context.user?.isAdmin) { throw new HttpError(403) }
+
+  const categoryConnect = {}
+  if (categoryId) {
+    categoryConnect.id = categoryId
+  } else if (categoryName) {
+    categoryConnect.name = categoryName
+  } else {
+    throw new HttpError(400, 'Either categoryId or categoryName must be provided')
+  }
+
+  // Validate choices format
+  if (!Array.isArray(choices) || choices.length === 0) {
+    throw new HttpError(400, 'Choices must be an array of {text, nickname} objects')
+  }
+
+  const pickem = await context.entities.Pickem.create({
+    data: {
+      category: {
+        connect: categoryConnect
+      },
+      contest: {
+        connect: { id: contestId }
+      },
+      choices: {
+        create: choices.map(({ text, nickname }) => ({
+          text,
+          nickname
+        }))
+      }
+    },
+    include: {
+      choices: true
+    }
+  })
+
+  // For each choice with a nickname, try to find the user and create their UserPickemChoice
+  for (const choice of pickem.choices) {
+    if (choice.nickname) {
+      const user = await context.entities.User.findFirst({
+        where: { nickname: choice.nickname }
+      })
+      
+      if (user) {
+        await context.entities.UserPickemChoice.create({
+          data: {
+            userId: user.id,
+            pickemChoiceId: choice.id,
+            pickemId: pickem.id
+          }
+        })
+      }
+    }
+  }
+
+  return pickem
 }

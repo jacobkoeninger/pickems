@@ -12,15 +12,22 @@ generator client {
 model User {
     id               Int               @id @default(autoincrement())
     createdAt        DateTime          @default(now())
-
     username         String            @unique
     displayName      String
     nickname         String?           // Two initials or null
     avatarUrl        String?
 
+    // Stats fields for denormalization
     points           Int               @default(0)
+    totalPicks       Int               @default(0)
+    correctPicks     Int               @default(0)
+    successRate      Float             @default(0)
+    lastPickAt       DateTime?
+    
     isAdmin          Boolean           @default(false)
     userPickemChoices UserPickemChoice[]
+
+    @@index([points, id]) // Optimize leaderboard queries
 }
 
 model Contest {
@@ -33,7 +40,7 @@ model Contest {
     isActive        Boolean          @default(true)
     pickems         Pickem[]
 
-    @@index([isActive])
+    @@index([isActive, deadline]) // Optimize active contest queries
 }
 
 model PickemCategory {
@@ -53,7 +60,7 @@ model Pickem {
     id                 Int           @id @default(autoincrement())
     createdAt         DateTime       @default(now())
     updatedAt         DateTime       @updatedAt
-    status            String         @default("OPEN") // OPEN, CLOSED, CANCELLED
+    status            PickemStatus   @default(OPEN)
     choices           PickemChoice[]
     correctChoice     PickemChoice?  @relation(name: "CorrectChoice", fields: [correctChoiceId], references: [id])
     correctChoiceId   Int?          @unique
@@ -63,9 +70,15 @@ model Pickem {
     contestId        Int
     userChoices      UserPickemChoice[]
 
-    @@index([status])
-    @@index([contestId])
-    @@index([categoryId])
+    @@index([status, contestId]) // Composite index for filtering
+    @@index([status, categoryId])
+    @@index([contestId, categoryId])
+}
+
+enum PickemStatus {
+    OPEN
+    CLOSED
+    CANCELLED
 }
 
 model PickemChoice {
@@ -80,7 +93,7 @@ model PickemChoice {
     nickname         String?          // Store the nickname from bulk upload
     correctFor       Pickem?          @relation(name: "CorrectChoice")
 
-    @@index([pickemId])
+    @@index([pickemId, nickname]) // Optimize nickname lookups
 }
 
 model UserPickemChoice {
@@ -95,7 +108,6 @@ model UserPickemChoice {
     pickemId        Int
 
     @@unique([userId, pickemId])
-    @@index([userId])
-    @@index([pickemId])
-    @@index([pickemChoiceId])
+    @@index([userId, createdAt]) // Optimize user history queries
+    @@index([pickemId, pickemChoiceId])
 }

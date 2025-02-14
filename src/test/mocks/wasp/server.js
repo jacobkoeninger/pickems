@@ -8,24 +8,28 @@ export class HttpError extends Error {
 export const prisma = {
   User: {
     findUnique: jest.fn(),
+    findFirst: jest.fn(),
     update: jest.fn(),
     create: jest.fn()
   },
   Pickem: {
     create: jest.fn(),
     findUnique: jest.fn(),
+    findMany: jest.fn(),
     update: jest.fn(),
     deleteMany: jest.fn()
   },
   PickemChoice: {
     create: jest.fn(),
     findUnique: jest.fn(),
+    findMany: jest.fn(),
     update: jest.fn(),
     deleteMany: jest.fn()
   },
   UserPickemChoice: {
     create: jest.fn(),
     findMany: jest.fn(),
+    findUnique: jest.fn(),
     deleteMany: jest.fn()
   },
   Contest: {

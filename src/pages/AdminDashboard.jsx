@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useQuery, useAction } from 'wasp/client/operations';
-import { getOpenPickems, updatePickemChoiceOwner, getPickemChoices, getCategories, getContests, updatePickem } from 'wasp/client/operations';
+import { getOpenPickems, updatePickemChoiceOwner, getPickemChoices, getCategories, getContests, updatePickem, automateAllUserChoices } from 'wasp/client/operations';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ContestCreationForm,
@@ -40,6 +40,7 @@ const AdminDashboard = () => {
   const { data: contests = [], isLoading: contestsLoading } = useQuery(getContests);
   const updatePickemChoiceOwnerFn = useAction(updatePickemChoiceOwner);
   const updatePickemFn = useAction(updatePickem);
+  const automateAllUserChoicesFn = useAction(automateAllUserChoices);
 
   // Memoized stats
   const stats = useMemo(() => {
@@ -57,6 +58,16 @@ const AdminDashboard = () => {
       setEditingChoice(null);
     } catch (error) {
       console.error('Failed to update owner:', error);
+    }
+  };
+
+  const handleAutomateChoices = async () => {
+    try {
+      const result = await automateAllUserChoicesFn({});
+      alert(result.message); // You might want to use a nicer notification system
+    } catch (error) {
+      console.error('Failed to automate choices:', error);
+      alert('Failed to automate choices: ' + error.message);
     }
   };
 
@@ -99,6 +110,13 @@ const AdminDashboard = () => {
               </div>
             </div>
             <div className="flex items-center space-x-4">
+              <button
+                onClick={handleAutomateChoices}
+                className="px-4 py-2 font-mono text-sm border border-green-500/30 rounded-sm
+                         hover:border-green-500 hover:bg-green-500/10 transition-all duration-200"
+              >
+                AUTOMATE_CHOICES
+              </button>
               <button
                 onClick={() => setShowCreateContest(true)}
                 className="px-4 py-2 font-mono text-sm border border-green-500/30 rounded-sm
