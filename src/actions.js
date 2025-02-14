@@ -236,9 +236,6 @@ export const createUserPickemChoice = async ({ userId, pickemChoiceId }, context
 export const closePickem = async ({ pickemId, correctChoiceId }, context) => {
   if (!context.user) { throw new HttpError(403); }
 
-  // Use fallback for UserPickemChoice if not defined
-  const userPickemChoiceEntity = (context.entities && context.entities.UserPickemChoice) || { findMany: async () => [] };
-
   const pickem = await context.entities.Pickem.findUnique({
     where: { id: pickemId },
     include: { choices: true }
@@ -250,19 +247,27 @@ export const closePickem = async ({ pickemId, correctChoiceId }, context) => {
   const correctChoice = pickem.choices.find(choice => choice.id === correctChoiceId);
   if (!correctChoice) { throw new HttpError(400, 'Invalid correct choice'); }
 
-  const incorrectChoices = pickem.choices.filter(choice => choice.id !== correctChoiceId);
-
-  const incorrectUserChoices = await userPickemChoiceEntity.findMany({
-    where: { pickemChoiceId: { in: incorrectChoices.map(choice => choice.id) } }
+  // Get all user choices for this pickem
+  const incorrectUserChoices = await context.entities.UserPickemChoice.findMany({
+    where: {
+      pickemId: pickemId,
+      pickemChoiceId: {
+        not: correctChoiceId
+      }
+    }
   });
 
-  const correctUserChoices = await userPickemChoiceEntity.findMany({
-    where: { pickemChoiceId: correctChoiceId }
+  const correctUserChoices = await context.entities.UserPickemChoice.findMany({
+    where: {
+      pickemId: pickemId,
+      pickemChoiceId: correctChoiceId
+    }
   });
 
   const pointsToDistribute = incorrectUserChoices.length;
   console.log(`Scoring logic: Calculated pointsToDistribute as ${pointsToDistribute} based on ${incorrectUserChoices.length} incorrect choices.`);
 
+  // Award points to users who chose correctly
   for (const userChoice of correctUserChoices) {
     await context.entities.User.update({
       where: { id: userChoice.userId },
@@ -270,9 +275,13 @@ export const closePickem = async ({ pickemId, correctChoiceId }, context) => {
     });
   }
 
+  // Mark the pickem as closed with the correct choice
   await context.entities.Pickem.update({
     where: { id: pickemId },
-    data: { correctChoiceId: correctChoiceId }
+    data: { 
+      correctChoiceId: correctChoiceId,
+      status: 'CLOSED'
+    }
   });
 };
 

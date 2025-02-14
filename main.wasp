@@ -64,7 +64,7 @@ action deleteContest {
 
 action closePickem {
   fn: import { closePickem } from "@src/actions.js",
-  entities: [Pickem, PickemChoice, User]
+  entities: [Pickem, PickemChoice, User, UserPickemChoice]
 }
 
 action bulkCreatePickems {
@@ -122,6 +122,11 @@ query getCategories {
 query getContests {
   fn: import { getContests } from "@src/queries.js",
   entities: [Contest]
+}
+
+query getPickemById {
+  fn: import { getPickemById } from "@src/queries.js",
+  entities: [Pickem, PickemChoice, PickemCategory]
 }
 
 route PickemPageRoute { path: "/", to: PickemPage }

@@ -15,7 +15,7 @@ export const getConfig = () => {
     return {
         clientID: process.env.DISCORD_CLIENT_ID,
         clientSecret: process.env.DISCORD_CLIENT_SECRET,
-        scope: ['identify'],
+        scope: ['identify', 'avatar'],
     }
 }
 
@@ -23,9 +23,7 @@ export const getConfig = () => {
 export const userSignupFields = {
     username: (data) => data.profile.username,
     displayName: (data) => data.profile.global_name || data.profile.username,
-    avatarUrl: (data) => data.profile.avatar ? 
-        `https://cdn.discordapp.com/avatars/${data.profile.id}/${data.profile.avatar}.png` : 
-        null,
+    avatarUrl: (data) => data.profile.avatar,
     nickname: (data) => nicknameMap[data.profile.global_name || data.profile.username] || null,
     isAdmin: (data) => {
         // Allow configuring initial admin user by Discord username

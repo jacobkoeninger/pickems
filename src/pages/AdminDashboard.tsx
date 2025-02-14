@@ -97,7 +97,6 @@ const AdminDashboard = () => {
       {confirmClose && (
         <PickemCloseDialog
           pickemId={confirmClose.pickemId}
-          correctChoiceId={confirmClose.correctChoiceId || ''}
           onClose={() => setConfirmClose(null)}
         />
       )}

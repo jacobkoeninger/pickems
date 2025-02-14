@@ -190,3 +190,36 @@ export const getLeaderboard = async (args, context) => {
 
   return users;
 };
+
+export const getPickemById = async ({ pickemId }, context) => {
+  if (!context.user) { throw new HttpError(401) }
+  
+  return context.entities.Pickem.findUnique({
+    where: { id: pickemId },
+    include: {
+      category: true,
+      choices: {
+        select: {
+          id: true,
+          text: true,
+          description: true,
+          nickname: true,
+          userChoices: {
+            select: {
+              id: true,
+              userId: true,
+              user: {
+                select: {
+                  id: true,
+                  username: true,
+                  nickname: true,
+                  avatarUrl: true
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  });
+}
