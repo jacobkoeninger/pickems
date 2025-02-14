@@ -18,5 +18,19 @@
   },
   "scripts": {
     "test": "jest"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "setupFilesAfterEnv": ["<rootDir>/src/test/setup.js"],
+    "modulePathIgnorePatterns": [
+      "<rootDir>/.wasp/",
+      "<rootDir>/build/"
+    ],
+    "testMatch": [
+      "<rootDir>/src/**/*.test.js"
+    ],
+    "moduleNameMapper": {
+      "^wasp/(.*)$": "<rootDir>/src/test/mocks/wasp/$1"
+    }
   }
 }
