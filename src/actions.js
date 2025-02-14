@@ -407,3 +407,44 @@ export const bulkCreatePickems = async (data, context) => {
 
   return createdPickems;
 };
+
+export const updatePickem = async (args, context) => {
+  if (!context.user) {
+    throw new HttpError(401, 'Not authorized')
+  }
+
+  const { id, choices } = args
+
+  // Verify the pickem exists and user has permission to edit it
+  const pickem = await context.entities.Pickem.findUnique({
+    where: { id },
+    include: {
+      choices: true,
+      contest: true
+    }
+  })
+
+  if (!pickem) {
+    throw new HttpError(404, 'Pickem not found')
+  }
+
+  // Only allow updates if user is admin
+  if (!context.user.isAdmin) {
+    throw new HttpError(403, 'Only admins can update pickems')
+  }
+
+  // Update each choice text while preserving nicknames
+  for (const choice of choices) {
+    await context.entities.PickemChoice.update({
+      where: { id: choice.id },
+      data: {
+        text: choice.text
+      }
+    })
+  }
+
+  return {
+    success: true,
+    message: 'Pickem updated successfully'
+  }
+}

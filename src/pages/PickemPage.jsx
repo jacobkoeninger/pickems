@@ -386,9 +386,149 @@ const PickemPage = () => {
             )}
 
             {activeTab === 'my-picks' && (
-              <div className="border border-green-500/30 rounded-lg p-6">
-                <h2 className="text-xl font-mono mb-6">&gt; MY_ACTIVE_PREDICTIONS:</h2>
-                {/* Add content for my picks tab */}
+              <div className="space-y-6">
+                {/* Stats Header */}
+                <div className="border border-green-500/30 rounded-lg p-6 bg-black">
+                  <div className="grid grid-cols-3 gap-6">
+                    <div className="flex flex-col">
+                      <span className="text-xs text-green-500/50 font-mono">TOTAL_PREDICTIONS</span>
+                      <span className="text-xl text-green-500 font-mono">{userChoices.length}</span>
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-xs text-green-500/50 font-mono">CORRECT_PICKS</span>
+                      <span className="text-xl text-green-500 font-mono">
+                        {userChoices.filter(c => c.isCorrect).length}
+                      </span>
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-xs text-green-500/50 font-mono">SUCCESS_RATE</span>
+                      <span className="text-xl text-green-500 font-mono">
+                        {userChoices.length > 0 
+                          ? Math.round((userChoices.filter(c => c.isCorrect).length / userChoices.length) * 100)
+                          : 0}%
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Predictions Grid */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-8">
+                  {userChoices.map(userChoice => {
+                    const pickem = pickems.find(p => p.id === userChoice.pickemId);
+                    if (!pickem) return null;
+
+                    const selectedChoice = pickem.choices.find(c => c.id === userChoice.pickemChoiceId);
+                    const otherChoice = pickem.choices.find(c => c.id !== userChoice.pickemChoiceId);
+                    
+                    return (
+                      <motion.div
+                        key={userChoice.id}
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="border border-green-500/30 rounded-sm p-6 bg-black hover:border-green-500 
+                                 transition-all duration-200 group relative overflow-hidden"
+                      >
+                        {/* Category Badge */}
+                        <div className="flex items-center justify-between mb-4">
+                          {pickem.category && (
+                            <div className="inline-flex items-center space-x-2">
+                              <span className="w-2 h-2 rounded-full bg-green-500/50 animate-pulse"></span>
+                              <span className="px-2 py-1 rounded-sm border border-green-500/30 
+                                          text-xs font-mono text-green-500 bg-black uppercase tracking-widest">
+                                {pickem.category.name}
+                              </span>
+                            </div>
+                          )}
+                          <div className="text-green-500/30 text-xs font-mono">
+                            #{String(pickem.id).padStart(3, '0')}
+                          </div>
+                        </div>
+
+                        {/* Status Badge */}
+                        <div className="mb-4">
+                          {pickem.correctChoiceId ? (
+                            <div className={`inline-flex items-center space-x-2 px-2 py-1 rounded-sm 
+                                        ${userChoice.isCorrect 
+                                          ? 'border-green-500 text-green-500 bg-green-500/10' 
+                                          : 'border-red-500 text-red-500 bg-red-500/10'} border`}>
+                              <span className="w-1.5 h-1.5 rounded-full animate-pulse"
+                                    style={{ backgroundColor: userChoice.isCorrect ? '#22c55e' : '#ef4444' }}></span>
+                              <span className="text-xs font-mono">
+                                {userChoice.isCorrect ? 'PREDICTION_CORRECT' : 'PREDICTION_INCORRECT'}
+                              </span>
+                            </div>
+                          ) : (
+                            <div className="inline-flex items-center space-x-2 px-2 py-1 rounded-sm 
+                                          border border-yellow-500 text-yellow-500 bg-yellow-500/10">
+                              <span className="w-1.5 h-1.5 rounded-full bg-yellow-500/50 animate-pulse"></span>
+                              <span className="text-xs font-mono">AWAITING_RESULT</span>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Choices */}
+                        <div className="space-y-4">
+                          {/* Selected Choice */}
+                          <div className="p-4 border rounded-sm transition-all duration-200
+                                      border-green-500 bg-green-900/20 text-green-500">
+                            <div className="flex items-start space-x-3">
+                              <span className="text-green-500/50 mt-1">&gt;</span>
+                              <div className="flex-1">
+                                <div className="flex items-center space-x-2 mb-2">
+                                  <span className="text-xs bg-green-500/10 px-2 py-0.5 rounded-sm">[YOUR_PICK]</span>
+                                  {pickem.correctChoiceId === selectedChoice.id && (
+                                    <span className="text-xs bg-green-500/10 px-2 py-0.5 rounded-sm">[✓]</span>
+                                  )}
+                                </div>
+                                <span className="font-mono leading-relaxed break-words">
+                                  {selectedChoice.text}
+                                </span>
+                                {selectedChoice.nickname && (
+                                  <div className="mt-2 text-xs border-t border-green-500/10 pt-2 font-mono">
+                                    <span className="text-green-500/50">AGENT: </span>
+                                    <span className="text-green-500/70">{selectedChoice.nickname}</span>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Other Choice */}
+                          <div className={`p-4 border rounded-sm transition-all duration-200
+                                      ${pickem.correctChoiceId === otherChoice.id
+                                        ? 'border-red-500 bg-red-900/20 text-red-500'
+                                        : 'border-gray-500/30 bg-black text-gray-500'}`}>
+                            <div className="flex items-start space-x-3">
+                              <span className="opacity-50 mt-1">&gt;</span>
+                              <div className="flex-1">
+                                <span className="font-mono leading-relaxed break-words">
+                                  {otherChoice.text}
+                                </span>
+                                {otherChoice.nickname && (
+                                  <div className="mt-2 text-xs border-t border-gray-500/10 pt-2 font-mono">
+                                    <span className="opacity-50">AGENT: </span>
+                                    <span className="opacity-70">{otherChoice.nickname}</span>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Metadata */}
+                        <div className="mt-4 pt-4 border-t border-green-500/20 flex justify-between items-center text-xs font-mono">
+                          <div className="flex items-center text-green-500/40">
+                            <span className="text-green-500/30">&gt; CONTEST:</span>
+                            <span className="ml-2">#{String(pickem.contestId).padStart(3, '0')}</span>
+                          </div>
+                          <div className="text-green-500/40">
+                            {new Date(userChoice.createdAt).toLocaleDateString()}
+                          </div>
+                        </div>
+                      </motion.div>
+                    );
+                  })}
+                </div>
               </div>
             )}
 

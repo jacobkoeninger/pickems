@@ -72,6 +72,11 @@ action bulkCreatePickems {
   entities: [User, Contest, Pickem, PickemChoice, PickemCategory]
 }
 
+action updatePickem {
+  fn: import { updatePickem } from "@src/actions.js",
+  entities: [Pickem, PickemChoice, User]
+}
+
 api bulkCreatePickemsApi {
   fn: import { bulkCreatePickems } from "@src/apis.js",
   httpRoute: (POST, "/bulk-create-pickems"),
